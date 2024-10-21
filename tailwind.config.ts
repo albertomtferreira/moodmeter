@@ -1,19 +1,24 @@
-import type { Config } from "tailwindcss";
+const { fontFamily } = require('tailwindcss/defaultTheme')
 
-const config: Config = {
-  content: [
-    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./app/**/*.{js,ts,jsx,tsx,mdx}",
-  ],
-  theme: {
-    extend: {
-      colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
-      },
-    },
-  },
-  plugins: [],
-};
-export default config;
+module.exports = {
+	content: [
+		'./pages/**/*.{js,ts,jsx,tsx}',
+		'./components/**/*.{js,ts,jsx,tsx}',
+		'./app/**/*.{js,ts,jsx,tsx}',
+	],
+	theme: {
+		extend: {
+			colors: {
+				primary: 'var(--color-primary)',
+				secondary: 'var(--color-secondary)',
+				tertiary: 'var(--color-tertiary)',
+				background: 'var(--color-background)',
+				text: 'var(--color-text)',
+			},
+			fontFamily: {
+				sans: ['Nunito', ...fontFamily.sans],
+			},
+		},
+	},
+	plugins: [],
+}

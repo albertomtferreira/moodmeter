@@ -1,101 +1,102 @@
-import Image from "next/image";
+"use client"
+import React, { useState } from 'react';
+import { Smile, Meh, Frown, Menu, Home, FileText, Settings, LogIn, LogOut } from 'lucide-react';
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Button } from "@/components/ui/button"
 
-export default function Home() {
+const FeedbackButton: React.FC<{ emotion: string; color: string; onClick: () => void }> = ({ emotion, color, onClick }) => (
+  console.log(color),
+
+  < button
+    onClick={onClick}
+    className={`flex flex-col items-center justify-center p-4 rounded-lg bg-${color} `}>
+    {emotion === 'happy' && <Smile size={196} color="white" />}
+    {emotion === 'okay' && <Meh size={196} color="white" />}
+    {emotion === 'unhappy' && <Frown size={196} color="white" />}
+    <span className="mt-2 text-background uppercase font-extrabold ">
+      {emotion.charAt(0).toUpperCase() + emotion.slice(1)}
+    </span>
+  </button >
+);
+
+const LeftMenu: React.FC = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <Sheet>
+      <SheetTrigger asChild>
+        <Button variant="ghost" size="icon" className="absolute left-4 top-4">
+          <Menu />
+        </Button>
+      </SheetTrigger>
+      <SheetContent side="left">
+        <nav className="flex flex-col space-y-4">
+          <Button variant="ghost" className="justify-start"><Home className="mr-2" /> Home</Button>
+          <Button variant="ghost" className="justify-start"><FileText className="mr-2" /> Report</Button>
+          <Button variant="ghost" className="justify-start"><Settings className="mr-2" /> Settings</Button>
+          <Button variant="ghost" className="justify-start" onClick={() => setIsLoggedIn(!isLoggedIn)}>
+            {isLoggedIn ? <><LogOut className="mr-2" /> Logout</> : <><LogIn className="mr-2" /> Login</>}
+          </Button>
+        </nav>
+      </SheetContent>
+    </Sheet>
+  );
+};
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+const RightMenu: React.FC = () => {
+  const schools = [
+    { name: 'School A', color: '#FF5733' },
+    { name: 'School B', color: '#33FF57' },
+    { name: 'School C', color: '#5733FF' },
+    { name: 'School D', color: '#FFFF33' },
+  ];
+
+  return (
+    <Sheet>
+      <SheetTrigger asChild>
+        <Button variant="ghost" size="icon" className="absolute right-4 top-4">
+          <Menu />
+        </Button>
+      </SheetTrigger>
+      <SheetContent side="right" className="w-full sm:max-w-none">
+        <div className="grid grid-cols-2 gap-4 p-4">
+          {schools.map((school, index) => (
+            <button
+              key={index}
+              className="aspect-square rounded-full flex items-center justify-center text-white font-bold text-xl transition-transform hover:scale-105"
+              style={{ backgroundColor: school.color }}
+            >
+              {school.name}
+            </button>
+          ))}
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </SheetContent>
+    </Sheet>
+  );
+};
+
+const HomePage: React.FC = () => {
+  const handleFeedback = (emotion: string) => {
+    console.log(`User selected: ${emotion}`);
+    // Here you would typically send this data to your backend
+  };
+
+  return (
+    <div className="min-h-screen bg-background flex flex-col h-screen justify-between items-center p-4">
+      <LeftMenu />
+      <RightMenu />
+      <div className="absolute top-4 left-1/2 transform -translate-x-1/2">
+        <img src="/api/placeholder/100/50" alt="Logo" className="h-12" />
+      </div>
+      <h1 className="text-2xl font-bold mt-8 text-text">How was your lunch today?</h1>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-16">
+        <FeedbackButton emotion="happy" color="primary" onClick={() => handleFeedback('happy')} />
+        <FeedbackButton emotion="okay" color="secondary" onClick={() => handleFeedback('okay')} />
+        <FeedbackButton emotion="unhappy" color="tertiary" onClick={() => handleFeedback('unhappy')} />
+      </div>
+      <p className="mb-4 text-sm text-text">Tap a face to share your feedback. This is anonymous.</p>
     </div>
   );
-}
+};
+
+export default HomePage;
