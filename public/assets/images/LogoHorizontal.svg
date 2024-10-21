@@ -1,0 +1,14 @@
+
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 300">
+<g transform="translate(0,80)">
+    <g transform="scale(0.75)">
+      <circle cx="100" cy="100" r="90" fill="none" stroke="#333" stroke-width="10"/>
+      <path d="M100,180 A90,90 0 0,1 28,145" fill="none" stroke="#F44336" stroke-width="30"/>
+      <path d="M100,190 A90,90 0 0,1 100,10" fill="none" stroke="#4CAF50" stroke-width="20"/>
+      <path d="M100,190 A90,90 0 0,1 173,145" fill="none" stroke="#FFC107" stroke-width="20"/>
+      <circle cx="100" cy="100" r="10" fill="#333"/>
+      <line x1="100" y1="100" x2="150" y2="50" stroke="#333" stroke-width="6"/>
+    </g>
+    <text x="150" y="85" font-family="Arial, sans-serif" font-size="36" font-weight="bold" fill="#333">MoodMeter</text>
+  </g>
+  </svg>
