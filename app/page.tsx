@@ -12,10 +12,6 @@ const HomePage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col h-screen justify-between items-center p-4">
-
-      <div className="absolute top-4 left-1/2 transform -translate-x-1/2">
-        <img src="/api/placeholder/100/50" alt="Logo" className="h-12" />
-      </div>
       <h1 className="text-2xl font-bold mt-8 text-text">How was your lunch today?</h1>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-16">
         <FeedbackButton emotion="happy" onClick={() => handleFeedback('happy')} />
