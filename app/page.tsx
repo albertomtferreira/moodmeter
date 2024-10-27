@@ -6,14 +6,17 @@ import type { Mood } from '@/types';
 import { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, Menu } from 'lucide-react';
+import { Menu, CheckCircle2, AlertCircle } from 'lucide-react';
+import { cn } from "@/lib/utils";
 
 const HomePage = () => {
   const { selectedSchool } = useSchool();
   const [viewportHeight, setViewportHeight] = useState('100vh');
   const [showModal, setShowModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
   const [lastSubmission, setLastSubmission] = useState<Date | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const SUBMISSION_COOLDOWN = 400; // ms cooldown period
 
   // Handle mobile viewport height adjustments
@@ -45,10 +48,10 @@ const HomePage = () => {
   }, []);
 
   const isButtonDisabled = (): boolean => {
-    return !!(lastSubmission && Date.now() - lastSubmission.getTime() < SUBMISSION_COOLDOWN);
+    return !!(lastSubmission && Date.now() - lastSubmission.getTime() < SUBMISSION_COOLDOWN) || isSubmitting;
   };
 
-  const handleFeedback = (emotion: Mood) => {
+  const handleFeedback = async (emotion: Mood) => {
     if (!selectedSchool) {
       setShowModal(true);
       return;
@@ -60,24 +63,101 @@ const HomePage = () => {
       return;
     }
 
-    const feedbackData = {
-      mood: emotion,
-      timestamp: new Date().toISOString(),
-      school: selectedSchool.name,
-      schoolId: selectedSchool.id
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch('/api/mood', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: emotion,
+          schoolId: selectedSchool.id,
+          period: 'LUNCH',
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit feedback');
+      }
+
+      // Record submission time
+      setLastSubmission(new Date());
+
+      // Show success modal
+      setShowSuccessModal(true);
+
+      // Auto-hide success modal after 2 seconds
+      setTimeout(() => {
+        setShowSuccessModal(false);
+      }, 2000);
+
+    } catch (error) {
+      console.error('Error submitting feedback:', error);
+      setShowErrorModal(true);
+      setTimeout(() => {
+        setShowErrorModal(false);
+      }, 3000);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Custom Notification Component
+  const Notification = ({
+    show,
+    onClose,
+    type,
+    title,
+    message,
+    icon: Icon
+  }: {
+    show: boolean;
+    onClose: (value: boolean) => void;
+    type: 'success' | 'error' | 'warning';
+    title: string;
+    message: string;
+    icon: any;
+  }) => {
+    if (!show) return null;
+
+    const bgColors = {
+      success: 'bg-green-500',
+      error: 'bg-red-500',
+      warning: 'bg-yellow-500'
     };
 
-    console.log('Feedback Data:', feedbackData);
-    // Record submission time
-    setLastSubmission(new Date());
-
-    // Show success modal
-    setShowSuccessModal(true);
-
-    // Auto-hide success modal after 2 seconds
-    setTimeout(() => {
-      setShowSuccessModal(false);
-    }, 2000);
+    return (
+      <div className={cn(
+        "fixed bottom-4 right-4 md:right-8 p-4 rounded-lg shadow-lg z-50",
+        "w-[300px] md:w-[350px]", // Fixed width
+        "transform transition-all duration-300 ease-in-out",
+        bgColors[type],
+        show ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
+      )}>
+        <div className="flex items-start space-x-3 text-white">
+          <div className="flex-shrink-0 pt-0.5">
+            <Icon className="h-5 w-5" />
+          </div>
+          <div className="flex-1 w-0">
+            <p className="font-medium text-sm">{title}</p>
+            <p className="mt-1 text-sm opacity-90 break-words">{message}</p>
+          </div>
+          <div className="flex-shrink-0">
+            <button
+              className="ml-2 inline-flex text-white hover:opacity-75"
+              onClick={() => onClose(false)}
+            >
+              <span className="sr-only">Close</span>
+              <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -90,7 +170,7 @@ const HomePage = () => {
         <div className="w-full max-w-6xl flex justify-center pt-2">
           <div
             className={`
-              inline-block px-4 py-2 rounded-full  text-sm sm:text-base font-medium shadow-md 
+              inline-block px-4 py-2 rounded-full text-sm sm:text-base font-medium shadow-md 
               transition-all duration-300 ease-in-out max-w-[90vw] truncate
               ${selectedSchool ? 'opacity-100 transform translate-y-0 text-white' : 'transform -translate-y-4 text-black'}
             `}
@@ -102,8 +182,7 @@ const HomePage = () => {
           </div>
         </div>
 
-
-        {/* School Selection Modal */}
+        {/* School Selection Modal - Keep this as a modal */}
         <Dialog open={showModal} onOpenChange={setShowModal}>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
@@ -129,18 +208,25 @@ const HomePage = () => {
           </DialogContent>
         </Dialog>
 
-        {/* Success Modal */}
-        {/* <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
-          <DialogContent className="sm:max-w-md text-center">
-            <div className="flex flex-col items-center py-4">
-              <CheckCircle2 className="h-12 w-12 text-green-500 mb-4" />
-              <DialogTitle className="text-xl mb-2">Thank You!</DialogTitle>
-              <DialogDescription>
-                Your feedback has been successfully recorded for {selectedSchool?.name}.
-              </DialogDescription>
-            </div>
-          </DialogContent>
-        </Dialog> */}
+        {/* Success Notification */}
+        <Notification
+          show={showSuccessModal}
+          onClose={setShowSuccessModal}
+          type="success"
+          title="Thank You!"
+          message={`Your feedback has been successfully recorded for ${selectedSchool?.name}.`}
+          icon={CheckCircle2}
+        />
+
+        {/* Error Notification */}
+        <Notification
+          show={showErrorModal}
+          onClose={setShowErrorModal}
+          type="error"
+          title="Oops!"
+          message="Something went wrong while recording your feedback. Please try again. User Session might have expired."
+          icon={AlertCircle}
+        />
 
         {/* Main Content */}
         <div className="flex-1 flex flex-col items-center justify-center w-full max-w-6xl" style={{ marginTop: '-20vh' }}>
