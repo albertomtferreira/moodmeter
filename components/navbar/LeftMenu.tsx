@@ -4,14 +4,37 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import Link from 'next/link';
 import { Menu, Home, FileText, Settings, LogIn, LogOut } from 'lucide-react';
+import { SignedIn, SignedOut, useClerk, } from '@clerk/nextjs';
+import { useRouter } from 'next/navigation';
 
 const LeftMenu: React.FC = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const router = useRouter(); // Initialize useRouter
 
   const closeMenu = () => {
     setIsOpen(false);
   };
+
+  const SignOutButton = () => {
+    const { signOut } = useClerk()
+
+    return (
+      // Clicking this button signs out a user
+      // and redirects them to the home page "/".
+      <Button
+        variant="ghost"
+        className="justify-start"
+        onClick={async () => {
+          await signOut();
+          closeMenu();
+          router.push('/');
+        }}
+      >
+        <LogIn className="mr-2" /> Sign out
+      </Button>
+
+    )
+  }
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -37,19 +60,33 @@ const LeftMenu: React.FC = () => {
               <Settings className="mr-2" /> Settings
             </Button>
           </Link>
-          <Button
-            variant="ghost"
-            className="justify-start"
-            onClick={() => {
-              setIsLoggedIn(!isLoggedIn);
-              closeMenu();
-            }}
-          >
-            {isLoggedIn ? <><LogOut className="mr-2" /> Logout</> : <><LogIn className="mr-2" /> Login</>}
-          </Button>
+          {/* Control if user is signed in */}
+          <SignedIn>
+
+            <SignOutButton />
+
+          </SignedIn>
+
+          {/* Control is user is signed out */}
+          <SignedOut>
+            <Link href="/sign-in">
+
+              <Button
+                variant="ghost"
+                className="justify-start"
+                onClick={closeMenu}
+              >
+                <LogIn className="mr-2" /> Login
+              </Button>
+
+
+            </Link>
+          </SignedOut>
+
+
         </nav>
-      </SheetContent>
-    </Sheet>
+      </SheetContent >
+    </Sheet >
   );
 };
 

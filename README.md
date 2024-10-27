@@ -14,9 +14,9 @@
 
 ### Phase 2: Authentication and User Management
 
-[ ] Set up Clerk authentication
+[x] Set up Clerk authentication
 
-[ ] Implement user registration and login flow
+[x] Implement user registration and login flow
 
 [ ] Create API for user school association
 

@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import Navbar from "@/components/navbar/Navbar";
+import { ClerkProvider } from "@clerk/nextjs";
+
+import { Providers } from "@/components/Providers";
 
 
 const geistSans = localFont({
@@ -64,14 +67,23 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <link rel="manifest" href="/manifest.json" />
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <Navbar />
-        {children}
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en">
+        <link rel="manifest" href="/manifest.json" />
+
+        <Providers>
+
+          <body
+            className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+          >
+            <Navbar />
+            {children}
+          </body>
+        </Providers>
+
+
+      </html>
+    </ClerkProvider>
+
   );
 }
