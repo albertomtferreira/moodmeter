@@ -11,6 +11,8 @@ async function main() {
       data: {
         email: 'test@example.com',
         name: 'Test User',
+        clerkId: 'test_clerk_id',
+        username: 'testuser',
       },
     });
     console.log('✅ User created:', user);

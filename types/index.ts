@@ -1,3 +1,5 @@
+import { UserRole } from "@prisma/client";
+
 // Emotion type for the different mood options
 export type Mood = 'happy' | 'okay' | 'unhappy';
 
@@ -21,8 +23,9 @@ export interface User {
   id: string;
   username: string;
   email: string;
-  role: 'admin' | 'school_admin' | 'user';
+  role: UserRole;
   schools: string[]; // Array of school IDs the user has access to
+  pin: string;
 }
 
 
