@@ -52,70 +52,148 @@ export async function POST(req: Request) {
     }
 
     const eventType = evt.type;
-    console.log('Event type:', eventType);
+    console.log(`Processing event: ${eventType}`);
 
-    if (eventType === 'user.created') {
-      try {
-        // Log the entire event data
-        console.log('Event data:', JSON.stringify(evt.data, null, 2));
+    // Connect to database at the start
+    await prisma.$connect();
+    console.log('Database connected successfully');
 
-        // Destructure with type checking
-        const data = evt.data;
-        const clerkId = data.id as string;
-        const username = data.username as string;
-        const emailAddresses = data.email_addresses as Array<any>;
-        const firstName = data.first_name as string;
-        const lastName = data.last_name as string;
-        const primaryEmailAddressId = data.primary_email_address_id as string;
+    try {
+      switch (eventType) {
+        case 'user.created': {
+          // Log the entire event data
+          console.log('Event data:', JSON.stringify(evt.data, null, 2));
 
-        console.log('Extracted data:', {
-          clerkId,
-          username,
-          emailAddresses,
-          firstName,
-          lastName,
-          primaryEmailAddressId
-        });
+          // Destructure with type checking
+          const data = evt.data;
+          const clerkId = data.id as string;
+          const username = data.username as string;
+          const emailAddresses = data.email_addresses as Array<any>;
+          const firstName = data.first_name as string;
+          const lastName = data.last_name as string;
+          const primaryEmailAddressId = data.primary_email_address_id as string;
 
-        // Find primary email
-        const primaryEmail = emailAddresses.find(
-          email => email.id === primaryEmailAddressId
-        );
+          console.log('Extracted data:', {
+            clerkId,
+            username,
+            emailAddresses,
+            firstName,
+            lastName,
+            primaryEmailAddressId
+          });
 
-        if (!primaryEmail) {
-          console.error('No primary email found in:', emailAddresses);
-          throw new Error('No primary email found');
+          // Find primary email
+          const primaryEmail = emailAddresses.find(
+            email => email.id === primaryEmailAddressId
+          );
+
+          if (!primaryEmail) {
+            console.error('No primary email found in:', emailAddresses);
+            throw new Error('No primary email found');
+          }
+
+          const user = await prisma.user.create({
+            data: {
+              clerkId,
+              username: username || primaryEmail.email_address.split('@')[0],
+              email: primaryEmail.email_address,
+              name: [firstName, lastName].filter(Boolean).join(' ') || null,
+              pin: "000000",
+              role: UserRole.VIEWER,
+            },
+          });
+
+          console.log('User created successfully:', user);
+
+          return new Response(JSON.stringify({ success: true, user }), {
+            status: 201,
+            headers: { 'Content-Type': 'application/json' },
+          });
         }
 
-        // Test database connection
-        await prisma.$connect();
-        console.log('Database connected successfully');
+        case 'user.updated': {
+          console.log('Processing user update event');
+          const data = evt.data;
+          const clerkId = data.id as string;
+          const username = data.username as string;
+          const emailAddresses = data.email_addresses as Array<any>;
+          const firstName = data.first_name as string;
+          const lastName = data.last_name as string;
+          const primaryEmailAddressId = data.primary_email_address_id as string;
 
-        const user = await prisma.user.create({
-          data: {
+          console.log('Update data:', {
             clerkId,
-            username: username || primaryEmail.email_address.split('@')[0],
-            email: primaryEmail.email_address,
-            name: [firstName, lastName].filter(Boolean).join(' ') || null,
-            pin: "000000",
-            role: UserRole.VIEWER,
-          },
-        });
+            username,
+            emailAddresses,
+            firstName,
+            lastName,
+            primaryEmailAddressId
+          });
 
-        console.log('User created successfully:', user);
+          // Find primary email
+          const primaryEmail = emailAddresses.find(
+            email => email.id === primaryEmailAddressId
+          );
 
-        return new Response(JSON.stringify({ success: true, user }), {
-          status: 201,
-          headers: { 'Content-Type': 'application/json' },
-        });
+          if (!primaryEmail) {
+            throw new Error('No primary email found in update data');
+          }
 
-      } catch (err) {
-        const error = err as Error | PrismaError;
-        console.error('Detailed error:', error);
+          // Update user in database
+          const updatedUser = await prisma.user.update({
+            where: { clerkId },
+            data: {
+              username: username || primaryEmail.email_address.split('@')[0],
+              email: primaryEmail.email_address,
+              name: [firstName, lastName].filter(Boolean).join(' ') || null,
+            },
+          });
 
-        // Check if it's a Prisma error
-        if (error instanceof Prisma.PrismaClientKnownRequestError) {
-          if (error.code === 'P2002') {
+          console.log('User updated successfully:', updatedUser);
+
+          return new Response(JSON.stringify({ success: true, user: updatedUser }), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+          });
+        }
+
+        case 'user.deleted': {
+          console.log('Processing user deletion event');
+          const data = evt.data;
+          const clerkId = data.id as string;
+
+          const deletedUser = await prisma.user.delete({
+            where: { clerkId },
+          });
+
+          console.log('User deleted successfully:', deletedUser);
+
+          return new Response(JSON.stringify({ success: true, user: deletedUser }), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+          });
+        }
+
+        default: {
+          console.log(`Unhandled event type: ${eventType}`);
+          return new Response(
+            JSON.stringify({ received: true, message: 'Unhandled event type' }),
+            {
+              status: 200,
+              headers: { 'Content-Type': 'application/json' },
+            }
+          );
+        }
+      }
+
+    } catch (err) {
+      const error = err as Error | PrismaError;
+      console.error('Detailed error:', error);
+
+      // Handle Prisma-specific errors
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        switch (error.code) {
+          case 'P2002': // Unique constraint violation
             return new Response(
               JSON.stringify({
                 error: 'User with this email or username already exists',
@@ -127,26 +205,44 @@ export async function POST(req: Request) {
               }),
               { status: 409 }
             );
-          }
+          case 'P2025': // Record not found
+            return new Response(
+              JSON.stringify({
+                error: 'User not found',
+                details: {
+                  code: error.code,
+                  message: error.message
+                }
+              }),
+              { status: 404 }
+            );
+          default:
+            return new Response(
+              JSON.stringify({
+                error: 'Database error',
+                details: {
+                  code: error.code,
+                  message: error.message
+                }
+              }),
+              { status: 500 }
+            );
         }
-
-        return new Response(
-          JSON.stringify({
-            error: 'Error creating user',
-            details: error.message,
-            stack: error instanceof Error ? error.stack : undefined
-          }),
-          { status: 400 }
-        );
-      } finally {
-        await prisma.$disconnect();
       }
-    }
 
-    return new Response(JSON.stringify({ received: true }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    });
+      // Handle other types of errors
+      return new Response(
+        JSON.stringify({
+          error: 'Error processing webhook',
+          details: error.message,
+          stack: error instanceof Error ? error.stack : undefined
+        }),
+        { status: 400 }
+      );
+
+    } finally {
+      await prisma.$disconnect();
+    }
 
   } catch (err) {
     const error = err as Error;
