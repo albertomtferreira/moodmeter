@@ -7,3 +7,18 @@ npx prisma db push
 
 last resource:
 npx prisma db push --force-reset
+
+
+
+ngrok
+
+QESEVSXG45
+B32HZXQK5Z
+DK4CDRZK2M
+AVGE4J6NMZ
+G5UEEMZBUT
+TUXGS5S8DE
+E5SGCMX74C
+ADS4KYXXWQ
+QJ2J6J7C8Q
+AM692FT8GS

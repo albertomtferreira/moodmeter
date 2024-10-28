@@ -17,9 +17,9 @@ export default authMiddleware({
     const svix_timestamp = req.headers.get("svix-timestamp") || undefined;
     const svix_signature = req.headers.get("svix-signature") || undefined;
 
-    if (!auth.userId && !req.nextUrl.pathname.startsWith('/sign-in')) {
-      return NextResponse.redirect(new URL('/sign-in', req.url));
-    }
+    // if (!auth.userId && !req.nextUrl.pathname.startsWith('/sign-in')) {
+    //   return NextResponse.redirect(new URL('/sign-in', req.url));
+    // }
 
     try {
       if (auth.userId) {

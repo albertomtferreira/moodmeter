@@ -1,8 +1,9 @@
 import { Button } from '@/components/ui/button'
+import { SignUp } from '@clerk/nextjs'
 import Link from 'next/link'
 import React from 'react'
 
-const SignUp = () => {
+const page = () => {
   return (
     <div className='flex flex-col items-center'>
       <div className='mb-4'>
@@ -16,10 +17,11 @@ const SignUp = () => {
         <Link href="/sign-in">
           <Button variant="default" className='w-25 align-middle justify-center'>Sign in</Button>
         </Link>
+        <SignUp />
 
       </div>
     </div>
   )
 }
 
-export default SignUp
+export default page
