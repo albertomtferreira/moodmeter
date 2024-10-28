@@ -17,7 +17,7 @@ const page = () => {
         <Link href="/sign-in">
           <Button variant="default" className='w-25 align-middle justify-center'>Sign in</Button>
         </Link>
-        <SignUp />
+        {/* <SignUp /> */}
 
       </div>
     </div>
