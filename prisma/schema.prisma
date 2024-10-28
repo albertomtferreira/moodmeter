@@ -11,12 +11,16 @@ datasource db {
 
 model User {
   id            String         @id @default(cuid())
+  clerkId       String         @unique  // To link with Clerk user
+  username      String         @unique
   email         String         @unique
   name          String?
+  pin           String         @default("000000")
+  role          UserRole       @default(VIEWER)
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
-  schools       SchoolUser[]   // Many-to-many relation with schools
-  settings      UserSettings?  // One-to-one relation with settings
+  schools       SchoolUser[]   
+  settings      UserSettings?
 }
 
 model School {
@@ -85,8 +89,8 @@ model SchoolSettings {
 }
 
 enum UserRole {
+  SUPER_ADMIN
   ADMIN
-  MANAGER
   VIEWER
 }
 

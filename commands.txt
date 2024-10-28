@@ -1,0 +1,9 @@
+How to update the schema with Prisma:
+first:
+npx prisma generate
+
+npx prisma db push
+
+
+last resource:
+npx prisma db push --force-reset
