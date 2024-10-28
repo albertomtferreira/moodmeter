@@ -5,6 +5,7 @@ import Navbar from "@/components/navbar/Navbar";
 import { ClerkProvider } from "@clerk/nextjs";
 
 import { Providers } from "@/components/Providers";
+import { Toaster } from "@/components/ui/toaster";
 
 
 const geistSans = localFont({
@@ -78,6 +79,7 @@ export default function RootLayout({
           >
             <Navbar />
             {children}
+            <Toaster />
           </body>
         </Providers>
 
