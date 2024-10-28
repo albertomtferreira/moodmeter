@@ -6,6 +6,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, LineChart,
 import { Loader2, CalendarIcon } from 'lucide-react';
 import { DatePickerWithPresets } from '@/components/DatePickerWithPresets';
 import { format } from 'date-fns';
+import { WeekPickerWithPresets } from '@/components/WeekPickerWithPresets';
 
 const COLORS = ['#4CAF50', '#FFC107', '#F44336'];
 
@@ -33,6 +34,7 @@ const ReportsPage: React.FC = () => {
   const [monthlyData, setMonthlyData] = useState<ChartData[]>([]);
   const [comparisonData, setComparisonData] = useState<ChartData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedWeek, setSelectedWeek] = useState<Date>(new Date());
 
   // Fetch schools (unchanged)
   useEffect(() => {
@@ -62,7 +64,7 @@ const ReportsPage: React.FC = () => {
 
     Promise.all([
       fetch(`/api/reports/daily?schoolId=${selectedSchool}&date=${format(selectedDate, 'yyyy-MM-dd')}`),
-      fetch(`/api/reports/weekly?schoolId=${selectedSchool}`),
+      fetch(`/api/reports/weekly?schoolId=${selectedSchool}&week=${format(selectedWeek, 'yyyy-MM-dd')}`),
       fetch(`/api/reports/monthly?schoolId=${selectedSchool}`)
     ])
       .then(([dailyRes, weeklyRes, monthlyRes]) =>
@@ -82,7 +84,7 @@ const ReportsPage: React.FC = () => {
         console.error('Error fetching report data:', error);
         setLoading(false);
       });
-  }, [selectedSchool, selectedDate]); // Added selectedDate dependency
+  }, [selectedSchool, selectedDate, selectedWeek]);
 
   if (loading) {
     return (
@@ -155,8 +157,12 @@ const ReportsPage: React.FC = () => {
         </Card>
 
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle>Weekly Trend</CardTitle>
+            <WeekPickerWithPresets
+              date={selectedWeek}
+              setDate={setSelectedWeek}
+            />
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
