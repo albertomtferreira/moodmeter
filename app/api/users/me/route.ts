@@ -124,36 +124,3 @@ export async function GET() {
     await prisma.$disconnect();
   }
 }
-
-// Response type for successful request
-export interface UserResponse {
-  id: string;
-  clerkId: string;
-  username: string;
-  email: string;
-  role: string;
-  schools: Array<{
-    school: {
-      id: string;
-      name: string;
-      code: string;
-      color: string;
-    };
-  }>;
-  settings: any; // Replace with proper settings type if available
-  hasSchools: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-// You can also create a type guard for the response
-export function isUserResponse(data: any): data is UserResponse {
-  return (
-    typeof data === 'object' &&
-    data !== null &&
-    typeof data.id === 'string' &&
-    typeof data.username === 'string' &&
-    typeof data.email === 'string' &&
-    Array.isArray(data.schools)
-  );
-}
