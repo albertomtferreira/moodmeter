@@ -68,24 +68,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
-      <html lang="en">
-        <link rel="manifest" href="/manifest.json" />
-
-        <Providers>
-
-          <body
-            className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-          >
+    <html lang="en">
+      <link rel="manifest" href="/manifest.json" />
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <ClerkProvider>
+          <Providers>
             <Navbar />
             {children}
             <Toaster />
-          </body>
-        </Providers>
-
-
-      </html>
-    </ClerkProvider>
-
+          </Providers>
+        </ClerkProvider>
+      </body>
+    </html>
   );
 }

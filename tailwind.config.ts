@@ -14,6 +14,7 @@ module.exports = {
 				tertiary: 'var(--color-tertiary)',
 				background: 'var(--color-background)',
 				text: 'var(--color-text)',
+				destructive: 'var(--color-destructive)',
 			},
 			fontFamily: {
 				sans: ['Nunito', ...fontFamily.sans],

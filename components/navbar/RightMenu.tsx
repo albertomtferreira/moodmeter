@@ -9,7 +9,7 @@ import { School } from '@/types';
 import { useRouter } from 'next/navigation';
 import { AuthModal } from '../AuthModal';
 import { useToast } from '@/hooks/use-toast';
-import { cn } from '@/lib/utils';
+
 
 const RightMenu: React.FC = () => {
   const { setSelectedSchool } = useSchool();
@@ -109,6 +109,11 @@ const RightMenu: React.FC = () => {
       },
     });
   };
+  const closeMenu = () => {
+    setIsOpen(false);
+    setIsAuthenticated(false);
+    setShowAuthModal(false)
+  };
 
   const SchoolGrid = () => (
     <div className="grid grid-cols-2 gap-4">
@@ -165,6 +170,7 @@ const RightMenu: React.FC = () => {
       <AuthModal
         isOpen={showAuthModal}
         onSuccess={handleAuthSuccess}
+        onCancel={closeMenu}
       />
     </>
   );

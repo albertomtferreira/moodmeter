@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import Link from 'next/link';
-import { Menu, Home, FileText, Settings, LogIn, LogOut } from 'lucide-react';
+import { Menu, Home, FileText, Settings, LogIn } from 'lucide-react';
 import { SignedIn, SignedOut, useClerk } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { AuthModal } from '../AuthModal';
@@ -30,6 +30,7 @@ const LeftMenu: React.FC = () => {
   const closeMenu = () => {
     setIsOpen(false);
     setIsAuthenticated(false);
+    setShowAuthModal(false)
   };
 
   const handleAuthSuccess = async () => {
@@ -140,6 +141,7 @@ const LeftMenu: React.FC = () => {
       <AuthModal
         isOpen={showAuthModal}
         onSuccess={handleAuthSuccess}
+        onCancel={closeMenu}
       />
     </>
   );

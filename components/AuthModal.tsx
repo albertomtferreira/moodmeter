@@ -10,11 +10,11 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface AuthModalProps {
   isOpen: boolean;
-
+  onCancel: () => void;
   onSuccess: () => void;
 }
 
-export function AuthModal({ isOpen, onSuccess }: AuthModalProps) {
+export function AuthModal({ isOpen, onSuccess, onCancel }: AuthModalProps) {
   const [username, setUsername] = useState('');
   const [pin, setPin] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -22,14 +22,13 @@ export function AuthModal({ isOpen, onSuccess }: AuthModalProps) {
   const { toast } = useToast();
 
   const resetForm = () => {
-
     setPin('');
     setError(null);
   };
 
   const handleClose = () => {
     resetForm();
-
+    onCancel();
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

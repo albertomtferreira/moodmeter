@@ -7,7 +7,17 @@ export type Mood = 'happy' | 'okay' | 'unhappy';
 export interface School {
   id: string;
   name: string;
+  code: string;
   color: string;
+}
+
+// Settings type
+export interface UserSettings {
+  userId: string;
+  theme?: string;
+  notifications?: boolean;
+  language: string;
+  defaultSchool?: string; // ID of the default school for the user
 }
 
 // ====== USER PARAMS
@@ -21,14 +31,28 @@ export type CreateUserParams = {
 // User type
 export interface User {
   id: string;
+  clerkId: string;
   username: string;
   email: string;
   role: UserRole;
-  schools: string[]; // Array of school IDs the user has access to
-  pin: string;
+  schools: Array<{
+    school: School;
+  }>;
+  settings: UserSettings;
+  hasSchools?: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
+export interface UserWithPermissions extends User {
+  permissions?: string[];
+}
 
+export interface APIError {
+  error: string;
+  message: string;
+  details?: string;
+}
 
 // Feedback type
 export interface Feedback {
@@ -65,13 +89,7 @@ export interface ApiResponse<T> {
   error?: string;
 }
 
-// Settings type
-export interface UserSettings {
-  userId: string;
-  theme: 'light' | 'dark';
-  language: string;
-  defaultSchool?: string; // ID of the default school for the user
-}
+
 
 // Offline feedback type (for storing feedback when offline)
 export interface OfflineFeedback extends Omit<Feedback, 'id'> {
