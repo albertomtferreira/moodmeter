@@ -1,5 +1,31 @@
+
 {
-  "cSpell.words": [
-    "moodmeter"
-  ]
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "typescript.validate.enable": true,
+  "typescript.tsserver.experimental.enableProjectDiagnostics": true,
+  // Disable reporting of unused variables in examples
+  "[typescript]": {
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "never"
+    }
+  },
+  // Exclude examples folder from search and problems
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/examples/**": true
+  },
+  "files.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/CVS": true,
+    "**/.DS_Store": true
+  },
+  // Optional: Add specific exclusions for TypeScript validation
+  "typescript.validate.exclude": [
+    "**/examples/**"
+  ],
+  // Optional: Disable JavaScript validation for examples
+  "javascript.validate.enable": false
 }
