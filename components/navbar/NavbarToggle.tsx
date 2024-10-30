@@ -27,6 +27,7 @@ const NavbarToggle = () => {
         toast({
           title: "Kiosk Mode Enabled",
           description: "Navbar is now hidden",
+          variant: "success",
           duration: 2000,
         });
       }

@@ -1,7 +1,6 @@
-// HomePage.tsx
+// app/page.tsx
 "use client"
 import FeedbackButton from '@/components/FeedbackButton';
-import { useSchool } from '@/contexts/SchoolContext';
 import type { Mood } from '@/types';
 import { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -9,17 +8,19 @@ import { Button } from "@/components/ui/button";
 import { Menu, CheckCircle2, AlertCircle } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { useAuthStore } from '@/store/useAuthStore';
+import { useSchoolStore } from '@/store/useSchoolStore';
+import { useAppStore } from '@/store/useAppStore';
 import NavbarToggle from '@/components/navbar/NavbarToggle';
 
 const HomePage = () => {
   const { isAuthenticated } = useAuthStore();
-  const { selectedSchool } = useSchool();
+  const { selectedSchool } = useSchoolStore();
+  const { setLoading } = useAppStore();
   const [viewportHeight, setViewportHeight] = useState('100vh');
   const [showModal, setShowModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [lastSubmission, setLastSubmission] = useState<Date | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const SUBMISSION_COOLDOWN = 400; // ms cooldown period
 
   // Handle mobile viewport height adjustments
@@ -50,13 +51,15 @@ const HomePage = () => {
     };
   }, []);
 
+  // Hydrate stores
   useEffect(() => {
-    // Initialize auth store after hydration
     useAuthStore.persist.rehydrate();
+    useSchoolStore.persist.rehydrate();
+    useAppStore.persist.rehydrate();
   }, []);
 
   const isButtonDisabled = (): boolean => {
-    return !!(lastSubmission && Date.now() - lastSubmission.getTime() < SUBMISSION_COOLDOWN) || isSubmitting;
+    return !!(lastSubmission && Date.now() - lastSubmission.getTime() < SUBMISSION_COOLDOWN) || false;
   };
 
   const handleFeedback = async (emotion: Mood) => {
@@ -71,7 +74,7 @@ const HomePage = () => {
       return;
     }
 
-    setIsSubmitting(true);
+    setLoading(true, 'Submitting feedback...');
 
     try {
       const response = await fetch('/api/mood', {
@@ -108,7 +111,7 @@ const HomePage = () => {
         setShowErrorModal(false);
       }, 3000);
     } finally {
-      setIsSubmitting(false);
+      setLoading(false);
     }
   };
 
@@ -139,7 +142,7 @@ const HomePage = () => {
     return (
       <div className={cn(
         "fixed bottom-4 right-4 md:right-8 p-4 rounded-lg shadow-lg z-50",
-        "w-[300px] md:w-[350px]", // Fixed width
+        "w-[300px] md:w-[350px]",
         "transform transition-all duration-300 ease-in-out",
         bgColors[type],
         show ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
@@ -175,7 +178,6 @@ const HomePage = () => {
         className="bg-background flex flex-col items-center px-4 py-2 sm:px-8 sm:py-4"
         style={{ height: viewportHeight, maxHeight: viewportHeight }}
       >
-
         {/* Header Section */}
         <div className="w-full max-w-6xl flex justify-center pt-2">
           <div
@@ -192,7 +194,7 @@ const HomePage = () => {
           </div>
         </div>
 
-        {/* School Selection Modal - Keep this as a modal */}
+        {/* School Selection Modal */}
         <Dialog open={showModal} onOpenChange={setShowModal}>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
@@ -218,7 +220,7 @@ const HomePage = () => {
           </DialogContent>
         </Dialog>
 
-        {/* Success Notification */}
+        {/* Notifications */}
         <Notification
           show={showSuccessModal}
           onClose={setShowSuccessModal}
@@ -228,7 +230,6 @@ const HomePage = () => {
           icon={CheckCircle2}
         />
 
-        {/* Error Notification */}
         <Notification
           show={showErrorModal}
           onClose={setShowErrorModal}
