@@ -1,9 +1,5 @@
 // types/roles.ts
-export enum UserRole {
-  VIEWER = 'VIEWER',
-  ADMIN = 'ADMIN',
-  SUPER_ADMIN = 'SUPER_ADMIN'
-}
+import { UserRole } from '@prisma/client';
 
 export interface Permission {
   view: boolean;
