@@ -7,51 +7,32 @@ import { Menu, Loader2 } from 'lucide-react';
 import { useSchool } from '@/contexts/SchoolContext';
 import { School } from '@/types';
 import { useRouter } from 'next/navigation';
-import { AuthModal } from '../AuthModal';
+import { useAuthStore } from '@/store/useAuthStore';
 import { useToast } from '@/hooks/use-toast';
-
 
 const RightMenu: React.FC = () => {
   const { setSelectedSchool } = useSchool();
+  const { isAuthenticated, isNavbarVisible } = useAuthStore();
+  const [isOpen, setIsOpen] = useState(false);
   const [schools, setSchools] = useState<School[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isOpen, setIsOpen] = useState(false);
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isPendingAuth, setIsPendingAuth] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
 
-  // Effect to handle auth success
+  // Fetch schools when menu opens
   useEffect(() => {
-    const handleAuthStateChange = async () => {
-      if (isAuthenticated && isPendingAuth) {
-        console.log('Auth state changed - fetching schools');
-        await fetchSchools();
-        setIsOpen(true);
-        setIsPendingAuth(false);
-        toast({
-          title: "Access Granted",
-          description: "You can now select a school",
-          duration: 3000,
-        });
-      }
-    };
-
-    handleAuthStateChange();
-  }, [isAuthenticated, isPendingAuth, toast]);
+    if (isOpen) {
+      fetchSchools();
+    }
+  }, [isOpen]);
 
   const fetchSchools = async () => {
-    console.log('Fetching schools...');
     setLoading(true);
     try {
       const response = await fetch('/api/schools');
-      if (!response.ok) {
-        throw new Error('Failed to fetch schools!');
-      }
+      if (!response.ok) throw new Error('Failed to fetch schools!');
       const data = await response.json();
-      console.log('Schools fetched:', data);
       setSchools(data);
       setError(null);
     } catch (err) {
@@ -62,42 +43,9 @@ const RightMenu: React.FC = () => {
     }
   };
 
-  const handleAuthSuccess = async () => {
-    console.log('Auth success handler called');
-    setIsAuthenticated(true);
-    await fetchSchools(); // Fetch schools immediately
-    setShowAuthModal(false); // Close modal after fetching schools
-    setIsOpen(true); // Open the menu
-    toast({
-      title: "Access Granted",
-      description: "You can now select a school",
-      duration: 3000,
-      variant: "success",
-    });
-  };
-
-  const handleMenuClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (!isAuthenticated) {
-      setShowAuthModal(true);
-    } else {
-      setIsOpen(true);
-    }
-  };
-
-  const handleSheetOpenChange = (open: boolean) => {
-    if (open && !isAuthenticated) {
-      setShowAuthModal(true);
-      return;
-    }
-    setIsOpen(open);
-  };
-
   const handleSchoolSelect = (school: School) => {
-    console.log('School selected:', school);
     setSelectedSchool(school);
     setIsOpen(false);
-    setIsAuthenticated(false);
     router.push('/');
     toast({
       title: "School Selected",
@@ -108,11 +56,6 @@ const RightMenu: React.FC = () => {
         color: 'white',
       },
     });
-  };
-  const closeMenu = () => {
-    setIsOpen(false);
-    setIsAuthenticated(false);
-    setShowAuthModal(false)
   };
 
   const SchoolGrid = () => (
@@ -145,34 +88,23 @@ const RightMenu: React.FC = () => {
   );
 
   return (
-    <>
-      <Sheet open={isOpen} onOpenChange={handleSheetOpenChange}>
-        <SheetTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute right-4 top-4"
-            onClick={handleMenuClick}
-          >
-            <Menu />
-          </Button>
-        </SheetTrigger>
-        {isAuthenticated && (
-          <SheetContent
-            side="right"
-            className="w-full sm:max-w-none flex items-center justify-center"
-          >
-            <SchoolGrid />
-          </SheetContent>
-        )}
-      </Sheet>
-
-      <AuthModal
-        isOpen={showAuthModal}
-        onSuccess={handleAuthSuccess}
-        onCancel={closeMenu}
-      />
-    </>
+    <Sheet open={isOpen} onOpenChange={setIsOpen}>
+      <SheetTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute right-4 top-4"
+        >
+          <Menu />
+        </Button>
+      </SheetTrigger>
+      <SheetContent
+        side="right"
+        className="w-full sm:max-w-none flex items-center justify-center"
+      >
+        <SchoolGrid />
+      </SheetContent>
+    </Sheet>
   );
 };
 

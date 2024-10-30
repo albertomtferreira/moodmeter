@@ -15,6 +15,7 @@ module.exports = {
 				background: 'var(--color-background)',
 				text: 'var(--color-text)',
 				destructive: 'var(--color-destructive)',
+				warning: 'var(--color-warning)',
 			},
 			fontFamily: {
 				sans: ['Nunito', ...fontFamily.sans],

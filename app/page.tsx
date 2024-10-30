@@ -8,8 +8,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import { Menu, CheckCircle2, AlertCircle } from 'lucide-react';
 import { cn } from "@/lib/utils";
+import { useAuthStore } from '@/store/useAuthStore';
+import NavbarToggle from '@/components/navbar/NavbarToggle';
 
 const HomePage = () => {
+  const { isAuthenticated } = useAuthStore();
   const { selectedSchool } = useSchool();
   const [viewportHeight, setViewportHeight] = useState('100vh');
   const [showModal, setShowModal] = useState(false);
@@ -45,6 +48,11 @@ const HomePage = () => {
       window.removeEventListener('resize', updateViewportHeight);
       window.removeEventListener('orientationchange', updateViewportHeight);
     };
+  }, []);
+
+  useEffect(() => {
+    // Initialize auth store after hydration
+    useAuthStore.persist.rehydrate();
   }, []);
 
   const isButtonDisabled = (): boolean => {
@@ -162,10 +170,12 @@ const HomePage = () => {
 
   return (
     <div>
+      <NavbarToggle />
       <div
         className="bg-background flex flex-col items-center px-4 py-2 sm:px-8 sm:py-4"
         style={{ height: viewportHeight, maxHeight: viewportHeight }}
       >
+
         {/* Header Section */}
         <div className="w-full max-w-6xl flex justify-center pt-2">
           <div
