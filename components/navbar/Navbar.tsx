@@ -1,8 +1,17 @@
-import React from 'react'
-import LeftMenu from './LeftMenu'
-import RightMenu from './RightMenu'
+// components/Navbar.tsx
+"use client"
+import React from 'react';
+import LeftMenu from './LeftMenu';
+import RightMenu from './RightMenu';
+import { useAuthStore } from '@/store/useAuthStore';
 
 const Navbar = () => {
+  const { isNavbarVisible } = useAuthStore();
+
+  if (!isNavbarVisible) {
+    return null;
+  }
+
   return (
     <div className='flex flex-row justify-between items-center'>
       <LeftMenu />
@@ -11,7 +20,7 @@ const Navbar = () => {
       </div>
       <RightMenu />
     </div>
-  )
-}
+  );
+};
 
-export default Navbar
+export default Navbar;

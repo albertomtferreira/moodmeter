@@ -1,86 +1,37 @@
 // components/LeftMenu.tsx
 "use client"
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import Link from 'next/link';
 import { Menu, Home, FileText, Settings, LogIn } from 'lucide-react';
 import { SignedIn, SignedOut, useClerk } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
-import { AuthModal } from '../AuthModal';
-import { useToast } from '@/hooks/use-toast';
+import { useAuthStore } from '@/store/useAuthStore';
 
 const LeftMenu: React.FC = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isPendingAuth, setIsPendingAuth] = useState(false);
+  const [isOpen, setIsOpen] = React.useState(false);
+  const { isAuthenticated, isNavbarVisible } = useAuthStore();
   const router = useRouter();
   const { signOut } = useClerk();
-  const { toast } = useToast();
 
-  // Effect to handle pending authentication
-  useEffect(() => {
-    if (isPendingAuth && isAuthenticated) {
-      setIsOpen(true);
-      setIsPendingAuth(false);
-    }
-  }, [isPendingAuth, isAuthenticated]);
-
-  const closeMenu = () => {
-    setIsOpen(false);
-    setIsAuthenticated(false);
-    setShowAuthModal(false)
-  };
-
-  const handleAuthSuccess = async () => {
-    console.log('Auth success handler called');
-    setIsAuthenticated(true);
-    setShowAuthModal(false);
-    setIsOpen(true); // Open the menu
-    toast({
-      title: "Access Granted",
-      description: "You can now select an option",
-      duration: 3000,
-      variant: "success",
-    });
-  };
-
-  const handleMenuClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (!isAuthenticated) {
-      setShowAuthModal(true);
-    } else {
-      setIsOpen(true);
-    }
-  };
-
-  const handleSheetOpenChange = (open: boolean) => {
-    if (open && !isAuthenticated) {
-      setShowAuthModal(true);
-      return;
-    }
-    setIsOpen(open);
-  };
+  const closeMenu = () => setIsOpen(false);
 
   const handleSignOut = async () => {
     await signOut();
-    setIsAuthenticated(false);
     setIsOpen(false);
     router.push('/');
   };
 
-  const SignOutButton = () => {
-    return (
-      <Button
-        variant="ghost"
-        className="justify-start"
-        onClick={handleSignOut}
-      >
-        <LogIn className="mr-2" /> Sign out
-      </Button>
-    );
-  };
+  const SignOutButton = () => (
+    <Button
+      variant="ghost"
+      className="justify-start"
+      onClick={handleSignOut}
+    >
+      <LogIn className="mr-2" /> Sign out
+    </Button>
+  );
 
   const MenuContent = () => (
     <nav className="flex flex-col space-y-4">
@@ -119,31 +70,20 @@ const LeftMenu: React.FC = () => {
   );
 
   return (
-    <>
-      <Sheet open={isOpen} onOpenChange={handleSheetOpenChange}>
-        <SheetTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute left-4 top-4"
-            onClick={handleMenuClick}
-          >
-            <Menu />
-          </Button>
-        </SheetTrigger>
-        {isAuthenticated && (
-          <SheetContent side="left">
-            <MenuContent />
-          </SheetContent>
-        )}
-      </Sheet>
-
-      <AuthModal
-        isOpen={showAuthModal}
-        onSuccess={handleAuthSuccess}
-        onCancel={closeMenu}
-      />
-    </>
+    <Sheet open={isOpen} onOpenChange={setIsOpen}>
+      <SheetTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute left-4 top-4"
+        >
+          <Menu />
+        </Button>
+      </SheetTrigger>
+      <SheetContent side="left">
+        <MenuContent />
+      </SheetContent>
+    </Sheet>
   );
 };
 
