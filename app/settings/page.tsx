@@ -4,6 +4,7 @@ import { usePermissions } from '@/hooks/usePermissions';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
+import DbConsole from '@/components/DbConsole';
 
 
 export default function SettingsPage() {
@@ -68,6 +69,19 @@ export default function SettingsPage() {
               </CardHeader>
               <CardContent>
                 {/* DB Console Controls */}
+              </CardContent>
+            </Card>
+          </ProtectedRoute>
+        </TabsContent>
+
+        <TabsContent value="system">
+          <ProtectedRoute feature="settings.dbConsole">
+            <Card>
+              <CardHeader>
+                <CardTitle>Database Management</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <DbConsole />
               </CardContent>
             </Card>
           </ProtectedRoute>
