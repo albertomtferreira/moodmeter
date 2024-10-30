@@ -1,17 +1,17 @@
-// components/RightMenu.tsx
+// components/navbar/RightMenu.tsx
 "use client"
 import React, { useEffect, useState } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { Menu, Loader2 } from 'lucide-react';
-import { useSchool } from '@/contexts/SchoolContext';
 import { School } from '@/types';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useToast } from '@/hooks/use-toast';
+import { useSchoolStore } from '@/store/useSchoolStore';
 
 const RightMenu: React.FC = () => {
-  const { setSelectedSchool } = useSchool();
+  const { setSelectedSchool } = useSchoolStore(); // Replace useSchool with useSchoolStore
   const { isAuthenticated, isNavbarVisible } = useAuthStore();
   const [isOpen, setIsOpen] = useState(false);
   const [schools, setSchools] = useState<School[]>([]);

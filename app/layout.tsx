@@ -1,11 +1,12 @@
+// app/layout.tsx
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import Navbar from "@/components/navbar/Navbar";
 import { ClerkProvider } from "@clerk/nextjs";
-
 import { Providers } from "@/components/Providers";
 import { Toaster } from "@/components/ui/toaster";
+import NavbarToggle from "@/components/navbar/NavbarToggle";
 
 
 const geistSans = localFont({
@@ -68,14 +69,23 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <link rel="manifest" href="/manifest.json" />
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="manifest" href="/manifest.json" />
+      </head>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background min-h-screen`}
+      >
         <ClerkProvider>
           <Providers>
-            <Navbar />
-            {children}
-            <Toaster />
+            <div className="relative flex min-h-screen flex-col">
+              <Navbar />
+
+              <main className="flex-1">
+                {children}
+              </main>
+              <Toaster />
+            </div>
           </Providers>
         </ClerkProvider>
       </body>

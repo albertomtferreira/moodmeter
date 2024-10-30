@@ -1,11 +1,13 @@
 // components/Providers.tsx
 "use client"
-import { SchoolProvider } from '@/contexts/SchoolContext';
-import { LoadingProvider } from '@/contexts/LoadingContext';
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ErrorBoundary } from './ErrorBoundary';
+import { LoadingOverlay } from './LoadingOverlay';
+import { useAppStore } from '@/store/useAppStore';
+import { useSchoolStore } from '@/store/useSchoolStore';
+import { useAuthStore } from '@/store/useAuthStore';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -20,22 +22,28 @@ export function Providers({ children }: { children: React.ReactNode }) {
           },
           mutations: {
             onError: (error: unknown) => {
-              console.error('Mutation error:', error);
+              useAppStore.getState().setError(
+                error instanceof Error ? error.message : 'An error occurred'
+              );
             },
           },
         },
       })
   );
 
+  // Hydrate Zustand stores
+  useEffect(() => {
+    useAppStore.persist.rehydrate();
+    useSchoolStore.persist.rehydrate();
+    useAuthStore.persist.rehydrate();
+  }, []);
+
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <LoadingProvider>
-          <SchoolProvider>
-            {children}
-            {process.env.NODE_ENV === 'development' && <ReactQueryDevtools />}
-          </SchoolProvider>
-        </LoadingProvider>
+        {children}
+        <LoadingOverlay />
+        {process.env.NODE_ENV === 'development' && <ReactQueryDevtools />}
       </QueryClientProvider>
     </ErrorBoundary>
   );
