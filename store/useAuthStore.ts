@@ -9,6 +9,7 @@ interface AuthState {
   toggleNavbar: () => void;
   setNavbarVisibility: (value: boolean) => void;
   logout: () => void;
+  resetState: () => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -20,20 +21,22 @@ export const useAuthStore = create<AuthState>()(
       toggleNavbar: () =>
         set((state) => ({
           isNavbarVisible: !state.isNavbarVisible,
-          // Reset authentication when hiding navbar
           isAuthenticated: !state.isNavbarVisible ? false : state.isAuthenticated
         })),
       setNavbarVisibility: (value) =>
         set({
           isNavbarVisible: value,
-          // Reset authentication when hiding navbar
           isAuthenticated: value ? false : false
         }),
       logout: () => set({ isAuthenticated: false }),
+      resetState: () => set({
+        isAuthenticated: false,
+        isNavbarVisible: true,
+      }),
     }),
     {
-      name: 'auth-storage', // name of the item in local storage
-      skipHydration: true, // Important for Next.js
+      name: 'auth-storage',
+      skipHydration: true,
     }
   )
 );

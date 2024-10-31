@@ -10,19 +10,24 @@ import { cn } from "@/lib/utils";
 import { useAuthStore } from '@/store/useAuthStore';
 import { useSchoolStore } from '@/store/useSchoolStore';
 import { useAppStore } from '@/store/useAppStore';
+import { usePreferredSchool } from '@/hooks/usePreferredSchool';
 import NavbarToggle from '@/components/navbar/NavbarToggle';
+import { SignedOut } from '@clerk/nextjs';
+import { SignedIn } from '@clerk/clerk-react';
 
 const HomePage = () => {
   const { isAuthenticated } = useAuthStore();
   const { selectedSchool, setSelectedSchool } = useSchoolStore();
   const { setLoading } = useAppStore();
+
   const [viewportHeight, setViewportHeight] = useState('100vh');
   const [showModal, setShowModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [lastSubmission, setLastSubmission] = useState<Date | null>(null);
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const { isInitialLoad, isLoading } = usePreferredSchool();
   const SUBMISSION_COOLDOWN = 400; // ms cooldown period
+
 
   // Handle mobile viewport height adjustments
   useEffect(() => {
@@ -78,7 +83,7 @@ const HomePage = () => {
           console.error('Error loading preferred school:', error);
         } finally {
           setLoading(false);
-          setIsInitialLoad(false);
+          // setIsInitialLoad(false);
         }
       }
     };
@@ -213,7 +218,9 @@ const HomePage = () => {
 
   return (
     <div>
-      <NavbarToggle />
+      <SignedIn>
+        <NavbarToggle />
+      </SignedIn>
       <div
         className="bg-background flex flex-col items-center px-4 py-2 sm:px-8 sm:py-4"
         style={{ height: viewportHeight, maxHeight: viewportHeight }}
@@ -284,7 +291,6 @@ const HomePage = () => {
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-8 text-text text-center px-2">
             How was your lunch today?
           </h1>
-
           <div className="grid grid-cols-3 gap-2 sm:gap-4 md:gap-8 w-full max-w-5xl px-2">
             <FeedbackButton
               emotion="happy"

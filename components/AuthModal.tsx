@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Loader2, AlertCircle } from "lucide-react";
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useAuthStore } from '@/store/useAuthStore';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -19,6 +20,7 @@ export function AuthModal({ isOpen, onSuccess, onCancel }: AuthModalProps) {
   const [pin, setPin] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { setAuthenticated } = useAuthStore();
   const { toast } = useToast();
 
   const resetForm = () => {
@@ -58,7 +60,14 @@ export function AuthModal({ isOpen, onSuccess, onCancel }: AuthModalProps) {
           variant: "success",
         });
         resetForm();
+        setAuthenticated(true);
         onSuccess();
+        toast({
+          title: "Authentication successful",
+          description: "Loading your preferences...",
+          duration: 3000,
+          variant: "success"
+        });
       } else {
         setError(data.error || "Invalid username or PIN");
         setPin('');
