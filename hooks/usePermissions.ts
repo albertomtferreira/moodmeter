@@ -34,7 +34,7 @@ export function usePermissions(): UsePermissionsReturn {
   useEffect(() => {
     if (userLoading) {
       setIsLoading(true);
-      setLoading(true, 'Loading permissions...');
+      setLoading(true);
     } else {
       setIsLoading(false);
       setLoading(false);

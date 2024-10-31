@@ -9,6 +9,7 @@ import DbConsole from '@/components/DbConsole';
 import { DebugProtectedRoute } from '@/components/debug/DebugProtectedRoute';
 import { UserButton, UserProfile } from '@clerk/nextjs';
 import UserProfileModal from '@/components/UserProfileModal';
+import UserSchools from '@/components/UserSchools';
 
 interface SettingsSectionProps {
   title: string;
@@ -81,12 +82,14 @@ export default function SettingsPage() {
                   </div>
                 </SettingsSection>
                 <SettingsSection
-                  title="Default School Settings"
-                  feature="settings.defaultSchool"
+                  title="School Management"
+                  feature="settings.userManagement"
                 >
-                  {/* Add your school settings form here */}
-                  <div className="text-sm text-muted-foreground">
-                    Configure your default school preferences
+                  <div className="space-y-4">
+                    <div className="text-sm text-muted-foreground mb-2">
+                      Manage your school assignments and set your preferred school
+                    </div>
+                    <UserSchools />
                   </div>
                 </SettingsSection>
                 <SettingsSection
