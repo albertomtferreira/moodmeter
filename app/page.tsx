@@ -1,7 +1,7 @@
 // app/page.tsx
 "use client"
 import FeedbackButton from '@/components/FeedbackButton';
-import type { Mood } from '@/types';
+import type { Mood, School } from '@/types';
 import { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -14,13 +14,14 @@ import NavbarToggle from '@/components/navbar/NavbarToggle';
 
 const HomePage = () => {
   const { isAuthenticated } = useAuthStore();
-  const { selectedSchool } = useSchoolStore();
+  const { selectedSchool, setSelectedSchool } = useSchoolStore();
   const { setLoading } = useAppStore();
   const [viewportHeight, setViewportHeight] = useState('100vh');
   const [showModal, setShowModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [lastSubmission, setLastSubmission] = useState<Date | null>(null);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
   const SUBMISSION_COOLDOWN = 400; // ms cooldown period
 
   // Handle mobile viewport height adjustments
@@ -50,6 +51,45 @@ const HomePage = () => {
       window.removeEventListener('orientationchange', updateViewportHeight);
     };
   }, []);
+
+  // Load preferred school on mount
+  useEffect(() => {
+    const loadPreferredSchool = async () => {
+      if (isAuthenticated && !selectedSchool && isInitialLoad) {
+        setLoading(true);
+        try {
+          const response = await fetch('/api/users/schools', {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to fetch schools');
+          }
+
+          const schools = await response.json();
+          const preferredSchool = schools.find((s: UserSchool) => s.isPreferred);
+
+          if (preferredSchool) {
+            setSelectedSchool(preferredSchool.school);
+          }
+        } catch (error) {
+          console.error('Error loading preferred school:', error);
+        } finally {
+          setLoading(false);
+          setIsInitialLoad(false);
+        }
+      }
+    };
+
+    loadPreferredSchool();
+  }, [isAuthenticated, selectedSchool, isInitialLoad, setSelectedSchool]);
+
+  interface UserSchool {
+    school: School;
+    isPreferred: boolean;
+  }
 
   // Hydrate stores
   useEffect(() => {

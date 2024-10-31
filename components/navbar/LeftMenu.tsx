@@ -7,11 +7,11 @@ import Link from 'next/link';
 import { Menu, Home, FileText, Settings, LogIn } from 'lucide-react';
 import { SignedIn, SignedOut, useClerk } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
-import { useAuthStore } from '@/store/useAuthStore';
+
 
 const LeftMenu: React.FC = () => {
   const [isOpen, setIsOpen] = React.useState(false);
-  const { isAuthenticated, isNavbarVisible } = useAuthStore();
+
   const router = useRouter();
   const { signOut } = useClerk();
 
