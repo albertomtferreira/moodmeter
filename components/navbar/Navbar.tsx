@@ -4,6 +4,7 @@ import React from 'react';
 import LeftMenu from './LeftMenu';
 import RightMenu from './RightMenu';
 import { useAuthStore } from '@/store/useAuthStore';
+import Link from 'next/link';
 
 const Navbar = () => {
   const { isNavbarVisible } = useAuthStore();
@@ -16,7 +17,10 @@ const Navbar = () => {
     <div className='flex flex-row justify-between items-center'>
       <LeftMenu />
       <div className='top-4 mx-auto'>
-        <img src="/assets/images/LogoHorizontal.svg" alt="Logo" className="h-20" />
+        <Link href="/">
+          <img src="/assets/images/LogoHorizontal.svg" alt="Logo" className="h-20" />
+        </Link>
+
       </div>
       <RightMenu />
     </div>
