@@ -7,6 +7,8 @@ import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { ContentSkeleton } from '@/components/LoadingOverlay';
 import DbConsole from '@/components/DbConsole';
 import { DebugProtectedRoute } from '@/components/debug/DebugProtectedRoute';
+import { UserButton, UserProfile } from '@clerk/nextjs';
+import UserProfileModal from '@/components/UserProfileModal';
 
 interface SettingsSectionProps {
   title: string;
@@ -15,6 +17,7 @@ interface SettingsSectionProps {
 }
 
 const SettingsSection = ({ title, feature, children }: SettingsSectionProps) => (
+
   <ProtectedRoute
     feature={feature}
     loadingComponent={<ContentSkeleton />}
@@ -28,6 +31,7 @@ const SettingsSection = ({ title, feature, children }: SettingsSectionProps) => 
 
 export default function SettingsPage() {
   const { canAccess, role, isLoading: permissionsLoading } = usePermissions();
+
 
   if (permissionsLoading) {
     return <ContentSkeleton />;
@@ -65,6 +69,18 @@ export default function SettingsPage() {
               </CardHeader>
               <CardContent className="space-y-6">
                 <SettingsSection
+                  title="Update Your Personal Details"
+                  feature="settings.userManagement"
+                >
+                  {/* Add your school settings form here */}
+                  <div className="space-y-4">
+                    <div className="text-sm text-muted-foreground mb-2">
+                      Update your personal information, email, and profile settings
+                    </div>
+                    <UserProfileModal />
+                  </div>
+                </SettingsSection>
+                <SettingsSection
                   title="Default School Settings"
                   feature="settings.defaultSchool"
                 >
@@ -73,7 +89,6 @@ export default function SettingsPage() {
                     Configure your default school preferences
                   </div>
                 </SettingsSection>
-
                 <SettingsSection
                   title="PIN Management"
                   feature="settings.updatePin"
