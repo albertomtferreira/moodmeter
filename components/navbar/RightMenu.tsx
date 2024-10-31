@@ -3,13 +3,13 @@
 import React from 'react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
-import { Menu, Loader2 } from 'lucide-react';
+
 import { School } from '@/types';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { useSchoolStore } from '@/store/useSchoolStore';
 import { SignedIn, useAuth } from '@clerk/nextjs';
-import { ContentSkeleton, LoadingSpinner } from '../LoadingOverlay';
+import { ContentSkeleton } from '../LoadingOverlay';
 
 interface UserSchool {
   school: School;
