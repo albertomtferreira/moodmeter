@@ -115,7 +115,6 @@ const DbConsole = () => {
   };
 
   const handleDelete = async (id: string) => {
-    // TODO modal to handle delete
     if (!confirm('Are you sure you want to delete this record?')) return;
 
     try {
@@ -304,22 +303,26 @@ const renderCellContent = (value: any, column: string) => {
   if (column === 'schools' && Array.isArray(value)) {
     return (
       <div className="flex flex-wrap gap-1">
-        {value.map((schoolUser: any) => (
-          <Badge
-            key={schoolUser.school.id}
-            variant="outline"
-            className="text-xs"
-            style={{
-              backgroundColor: schoolUser.school.color + '20', // Add transparency
-              borderColor: schoolUser.school.color
-            }}
-          >
-            {schoolUser.school.name}
-            {schoolUser.isPreferred &&
-              <span className="ml-1" title="Preferred School">★</span>
-            }
-          </Badge>
-        ))}
+        {value
+          .sort((a, b) =>
+            a.school.name.toLowerCase().localeCompare(b.school.name.toLowerCase())
+          )
+          .map((schoolUser: any) => (
+            <Badge
+              key={schoolUser.school.id}
+              variant="outline"
+              className="text-xs"
+              style={{
+                backgroundColor: schoolUser.school.color + '20', // Add transparency
+                borderColor: schoolUser.school.color
+              }}
+            >
+              {schoolUser.school.name}
+              {schoolUser.isPreferred &&
+                <span className="ml-1" title="Preferred School">★</span>
+              }
+            </Badge>
+          ))}
       </div>
     );
   }

@@ -69,6 +69,9 @@ export async function GET(
       case 'school':
         const schools = await prisma.school.findMany({
           take: 100,
+          orderBy: {
+            name: 'asc'
+          }
         });
         return NextResponse.json(schools);
 
