@@ -4,9 +4,9 @@ import { persist } from 'zustand/middleware';
 import { School } from '@/types';
 
 interface SchoolState {
-  selectedSchool: School | null;
-  setSelectedSchool: (school: School | null) => void;
-  resetSchool: () => void;
+  selectedSchool?: School | null;
+  setSelectedSchool?: (school: School | null) => void;
+  resetSchool?: () => void;
 }
 
 export const useSchoolStore = create<SchoolState>()(
@@ -20,5 +20,4 @@ export const useSchoolStore = create<SchoolState>()(
       name: 'school-storage',
       skipHydration: true,
     }
-  )
-);
+  ))

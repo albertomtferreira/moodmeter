@@ -3,12 +3,12 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 interface AppState {
-  isLoading: boolean;
-  loadingMessage: string;
-  error: string | null;
-  setLoading: (loading: boolean, message?: string) => void;
-  setError: (error: string | null) => void;
-  resetState: () => void;
+  isLoading?: boolean;
+  loadingMessage?: string;
+  error?: string | null;
+  setLoading?: (loading: boolean, message?: string) => void;
+  setError?: (error: string | null) => void;
+  resetState?: () => void;
 }
 
 export const useAppStore = create<AppState>()(
