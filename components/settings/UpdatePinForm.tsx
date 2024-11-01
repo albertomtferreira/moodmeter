@@ -12,7 +12,11 @@ export const UpdatePinForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true, 'Updating PIN...');
+    setLoading({
+      isLoading: true,
+      message: 'Updating PIN...',
+      type: 'content'
+    });
 
     try {
       // API call to update PIN
@@ -22,7 +26,9 @@ export const UpdatePinForm = () => {
     } catch (error) {
       // Handle error
     } finally {
-      setLoading(false);
+      setLoading({
+        isLoading: false
+      });
     }
   };
 

@@ -9,24 +9,53 @@ interface LoadingOverlayProps {
 }
 
 export function LoadingOverlay({ className }: LoadingOverlayProps) {
-  const { isLoading, loadingMessage } = useAppStore();
+  const { loading } = useAppStore();
+  const { isLoading, loadingMessage, loadingType, rows } = loading;
 
   if (!isLoading) return null;
 
-  return (
-    <div
-      className={cn(
-        "fixed inset-0 bg-black/50 flex items-center justify-center z-50",
-        "backdrop-blur-[2px] transition-all duration-200",
-        className
-      )}
-    >
-      <div className="bg-white p-6 rounded-lg shadow-xl">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto" />
-        <p className="mt-4 text-center text-sm">{loadingMessage || 'Loading...'}</p>
+  const renderLoader = () => {
+    switch (loadingType) {
+      case 'content':
+        return <ContentSkeleton />;
+      case 'table':
+        return <TableSkeleton rows={rows} />;
+      case 'card':
+        return <CardSkeleton />;
+      case 'spinner':
+        return <LoadingSpinner size="lg" />;
+      case 'form':
+        return <FormFieldSkeleton />;
+      case 'settings':
+        return <SettingsSkeleton />;
+      case 'overlay':
+      default:
+        return (
+          <div className="bg-white p-6 rounded-lg shadow-xl">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto" />
+            <p className="mt-4 text-center text-sm">{loadingMessage || 'Loading...'}</p>
+          </div>
+        );
+    }
+  };
+
+  // Only apply overlay styles for overlay type
+  if (loadingType === 'overlay') {
+    return (
+      <div
+        className={cn(
+          "fixed inset-0 bg-black/50 flex items-center justify-center z-50",
+          "backdrop-blur-[2px] transition-all duration-200",
+          className
+        )}
+      >
+        {renderLoader()}
       </div>
-    </div>
-  );
+    );
+  }
+
+  // For other types, render directly
+  return renderLoader();
 }
 
 // Content skeleton for larger sections
@@ -149,4 +178,26 @@ export function SettingsSkeleton() {
       </div>
     </div>
   );
+}
+
+// Export all loading types for TypeScript support
+export type LoadingType = 'overlay' | 'content' | 'table' | 'card' | 'spinner' | 'form' | 'settings';
+
+// Export loading component options for type safety
+export interface LoadingOptions {
+  isLoading: boolean;
+  message?: string;
+  type?: LoadingType;
+  rows?: number;
+}
+
+// Helper function to generate loading options
+export function createLoadingOptions(
+  options: Partial<LoadingOptions> & { isLoading: boolean }
+): LoadingOptions {
+  return {
+    message: 'Loading...',
+    type: 'overlay',
+    ...options,
+  };
 }

@@ -9,9 +9,11 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Star, StarOff } from "lucide-react";
+import { Star, StarOff } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
-import { ContentSkeleton, TableSkeleton } from '@/components/LoadingOverlay';
+import { TableSkeleton } from '@/components/LoadingOverlay';
+
+import { useAppStore } from '@/store/useAppStore';
 
 interface School {
   id: string;
@@ -30,7 +32,7 @@ interface UserSchoolsProps {
 
 const UserSchools = ({ userId }: UserSchoolsProps) => {
   const [schools, setSchools] = useState<SchoolUser[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { setLoading } = useAppStore();
   const [updatingPreferred, setUpdatingPreferred] = useState(false);
   const { toast } = useToast();
   const { userId: clerkUserId } = useAuth();
@@ -43,6 +45,11 @@ const UserSchools = ({ userId }: UserSchoolsProps) => {
 
   const fetchUserSchools = async () => {
     if (!effectiveUserId) return;
+    setLoading({
+      isLoading: true,
+      message: 'Loading schools...',
+      type: 'content'
+    });
 
     try {
       const response = await fetch(`/api/admin/data/user/${effectiveUserId}/schools`);
@@ -56,12 +63,20 @@ const UserSchools = ({ userId }: UserSchoolsProps) => {
         variant: 'destructive',
       });
     } finally {
-      setLoading(false);
+      setLoading({
+        isLoading: false
+      });
     }
   };
 
   const handleSetPreferred = async (schoolId: string) => {
-    setUpdatingPreferred(true);
+    setLoading({
+      isLoading: true,
+      message: 'Updating preferred school...',
+      type: 'table',
+      rows: schools.length
+    });
+
     try {
       const response = await fetch(`/api/admin/data/user/${effectiveUserId}/preferred-school`, {
         method: 'PUT',
@@ -90,19 +105,12 @@ const UserSchools = ({ userId }: UserSchoolsProps) => {
         description: 'Failed to update preferred school',
         variant: 'destructive',
       });
-    }
-    finally {
-      setUpdatingPreferred(false);
+    } finally {
+      setLoading({
+        isLoading: false
+      });
     }
   };
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center p-4">
-        <ContentSkeleton />
-      </div>
-    );
-  }
 
   return (
     <Card>

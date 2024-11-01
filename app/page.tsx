@@ -61,7 +61,11 @@ const HomePage = () => {
   useEffect(() => {
     const loadPreferredSchool = async () => {
       if (isAuthenticated && !selectedSchool && isInitialLoad) {
-        setLoading(true);
+        setLoading({
+          isLoading: true,
+          message: 'Loading content...',
+          type: 'content'
+        });
         try {
           const response = await fetch('/api/users/schools', {
             headers: {
@@ -82,8 +86,10 @@ const HomePage = () => {
         } catch (error) {
           console.error('Error loading preferred school:', error);
         } finally {
-          setLoading(false);
-          // setIsInitialLoad(false);
+          setLoading({
+            isLoading: false
+          });
+
         }
       }
     };
@@ -119,7 +125,11 @@ const HomePage = () => {
       return;
     }
 
-    setLoading(true, 'Submitting feedback...');
+    setLoading({
+      isLoading: true,
+      message: 'Submitting Feedback...',
+      type: 'content'
+    });
 
     try {
       const response = await fetch('/api/mood', {
@@ -156,7 +166,9 @@ const HomePage = () => {
         setShowErrorModal(false);
       }, 3000);
     } finally {
-      setLoading(false);
+      setLoading({
+        isLoading: false
+      });
     }
   };
 

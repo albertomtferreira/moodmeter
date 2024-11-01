@@ -1,10 +1,9 @@
 // components/DatePickerWithPresets.tsx
 "use client"
-
 import * as React from "react"
+import { Dispatch, SetStateAction } from 'react';
 import { addDays, format } from "date-fns"
 import { Calendar as CalendarIcon } from "lucide-react"
-
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
@@ -15,11 +14,17 @@ import {
 } from "@/components/ui/popover"
 
 interface DatePickerProps {
-  date: Date
-  setDate: (date: Date) => void
+  date?: Date;
+  setDate: Dispatch<SetStateAction<Date>>;
 }
 
-export function DatePickerWithPresets({ date, setDate }: DatePickerProps) {
+export const DatePickerWithPresets = ({ date, setDate }: DatePickerProps) => {
+  const handleSelect = React.useCallback((newDate: Date | undefined) => {
+    if (newDate) {
+      setDate(newDate);
+    }
+  }, [setDate]);
+
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -39,14 +44,14 @@ export function DatePickerWithPresets({ date, setDate }: DatePickerProps) {
           <Button
             variant="outline"
             className="flex-1 bg-white hover:bg-gray-100"
-            onClick={() => setDate(new Date())}
+            onClick={() => handleSelect(new Date())}
           >
             Today
           </Button>
           <Button
             variant="outline"
             className="flex-1 bg-white hover:bg-gray-100"
-            onClick={() => setDate(addDays(new Date(), -1))}
+            onClick={() => handleSelect(addDays(new Date(), -1))}
           >
             Yesterday
           </Button>
@@ -55,7 +60,8 @@ export function DatePickerWithPresets({ date, setDate }: DatePickerProps) {
           <Calendar
             mode="single"
             selected={date}
-            onSelect={(date) => date && setDate(date)}
+            weekStartsOn={1}
+            onSelect={handleSelect}
             initialFocus
             className="bg-white"
           />
