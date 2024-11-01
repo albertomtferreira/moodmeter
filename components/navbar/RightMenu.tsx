@@ -3,13 +3,13 @@
 import React from 'react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
-
 import { School } from '@/types';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { useSchoolStore } from '@/store/useSchoolStore';
 import { SignedIn, useAuth } from '@clerk/nextjs';
-import { ContentSkeleton } from '../LoadingOverlay';
+import { ContentSkeleton, LoadingOverlay } from '../LoadingOverlay';
+import { useAppStore } from '@/store/useAppStore';
 
 interface UserSchool {
   school: School;
@@ -21,7 +21,9 @@ const RightMenu: React.FC = () => {
   const { setSelectedSchool } = useSchoolStore();
   const { isSignedIn, userId } = useAuth();
   const [userSchools, setUserSchools] = React.useState<UserSchool[]>([]);
-  const [loading, setLoading] = React.useState(false);
+  // const [loading, setLoading] = React.useState(false);
+  // const { setLoading } = useAppStore();
+  const { setLoading, loading } = useAppStore();
   const [error, setError] = React.useState<string | null>(null);
   const router = useRouter();
   const { toast } = useToast();
@@ -35,7 +37,12 @@ const RightMenu: React.FC = () => {
   }, [isOpen, isSignedIn]);
 
   const fetchUserSchools = async () => {
-    setLoading(true);
+
+    setLoading({
+      isLoading: true,
+      message: 'Fetching Schools...',
+      type: 'content'
+    });
     try {
       // Add authentication header
       const response = await fetch('/api/users/schools', {
@@ -57,7 +64,9 @@ const RightMenu: React.FC = () => {
       console.error('Error fetching user schools:', err);
       setError(err instanceof Error ? err.message : 'Failed to load your schools');
     } finally {
-      setLoading(false);
+      setLoading({
+        isLoading: false
+      });
     }
   };
 
@@ -78,8 +87,8 @@ const RightMenu: React.FC = () => {
 
   const SchoolGrid = () => (
     <div className="grid grid-cols-1 gap-4 w-full max-w-md mx-auto">
-      {loading ? (
-        <ContentSkeleton />
+      {loading.isLoading && loading.loadingType === 'content' ? (
+        <LoadingOverlay />
       ) : error ? (
         <div className="text-center text-red-500 py-4">
           {error}

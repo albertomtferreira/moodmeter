@@ -34,10 +34,16 @@ export function usePermissions(): UsePermissionsReturn {
   useEffect(() => {
     if (userLoading) {
       setIsLoading(true);
-      setLoading(true);
+      setLoading({
+        isLoading: true,
+        message: 'Loading content...',
+        type: 'content'
+      });
     } else {
       setIsLoading(false);
-      setLoading(false);
+      setLoading({
+        isLoading: false
+      });
     }
   }, [userLoading, setLoading]);
 

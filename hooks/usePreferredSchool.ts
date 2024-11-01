@@ -36,7 +36,12 @@ export function usePreferredSchool() {
       // 4. No school is currently selected
       if (clerkLoaded && user && !hasAttemptedLoad && !selectedSchool) {
         console.log('Attempting to load preferred school');
-        setLoading(true, 'Loading your school...');
+
+        setLoading({
+          isLoading: true,
+          message: 'Loading your school...',
+          type: 'content'
+        });
 
         try {
           const response = await fetch('/api/users/schools', {
@@ -61,7 +66,9 @@ export function usePreferredSchool() {
         } catch (error) {
           console.error('Error loading preferred school:', error);
         } finally {
-          setLoading(false);
+          setLoading({
+            isLoading: false
+          });
           setIsInitialLoad(false);
           setHasAttemptedLoad(true);
         }

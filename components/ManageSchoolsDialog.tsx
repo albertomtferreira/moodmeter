@@ -13,6 +13,8 @@ import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { useAppStore } from '@/store/useAppStore';
+import { LoadingOverlay } from '@/components/LoadingOverlay';
 
 interface ManageSchoolsDialogProps {
   userId: string;
@@ -25,38 +27,54 @@ const ManageSchoolsDialog = ({ userId, userName, currentSchools }: ManageSchools
   const [schools, setSchools] = useState<any[]>([]);
   const [selectedSchools, setSelectedSchools] = useState<Set<string>>(new Set());
   const [preferredSchool, setPreferredSchool] = useState<string>('');
-  const [loading, setLoading] = useState(false);
+  const { setLoading } = useAppStore();
   const { toast } = useToast();
 
   // Fetch all available schools
   useEffect(() => {
     const fetchSchools = async () => {
+      setLoading({
+        isLoading: true,
+        message: 'Loading available schools...',
+        type: 'content'
+      });
+
       try {
         const response = await fetch('/api/admin/data/school');
         if (!response.ok) throw new Error('Failed to fetch schools');
         const data = await response.json();
         setSchools(data);
+
+        // Set initial selections based on current schools
+        const initialSelected = new Set(currentSchools.map(s => s.school.id));
+        setSelectedSchools(initialSelected);
+        const preferred = currentSchools.find(s => s.isPreferred);
+        if (preferred) setPreferredSchool(preferred.school.id);
       } catch (error) {
         toast({
           title: 'Error',
           description: 'Failed to fetch schools',
           variant: 'destructive',
         });
+      } finally {
+        setLoading({
+          isLoading: false
+        });
       }
     };
 
     if (isOpen) {
       fetchSchools();
-      // Set initial selections based on current schools
-      const initialSelected = new Set(currentSchools.map(s => s.school.id));
-      setSelectedSchools(initialSelected);
-      const preferred = currentSchools.find(s => s.isPreferred);
-      if (preferred) setPreferredSchool(preferred.school.id);
     }
-  }, [isOpen, currentSchools]);
+  }, [isOpen, currentSchools, setLoading]);
 
   const handleSubmit = async () => {
-    setLoading(true);
+    setLoading({
+      isLoading: true,
+      message: 'Updating school assignments...',
+      type: 'form'
+    });
+
     try {
       const response = await fetch(`/api/admin/users/${userId}/schools`, {
         method: 'POST',
@@ -82,7 +100,9 @@ const ManageSchoolsDialog = ({ userId, userName, currentSchools }: ManageSchools
         variant: 'destructive',
       });
     } finally {
-      setLoading(false);
+      setLoading({
+        isLoading: false
+      });
     }
   };
 
@@ -169,12 +189,13 @@ const ManageSchoolsDialog = ({ userId, userName, currentSchools }: ManageSchools
             </Button>
             <Button
               onClick={handleSubmit}
-              disabled={loading}
+              disabled={useAppStore(state => state.loading.isLoading)}
             >
               Save Changes
             </Button>
           </div>
         </div>
+        <LoadingOverlay />
       </DialogContent>
     </Dialog>
   );

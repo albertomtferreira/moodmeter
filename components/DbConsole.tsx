@@ -24,8 +24,10 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { SearchIcon, PlusCircle, RefreshCw, Edit, Trash2, Loader2 } from 'lucide-react';
+import { SearchIcon, PlusCircle, RefreshCw, Edit, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useAppStore } from '@/store/useAppStore';
+import { LoadingOverlay } from '@/components/LoadingOverlay';
 import ModelForm from './ModelForm';
 import ManageSchoolsDialog from './ManageSchoolsDialog';
 
@@ -37,10 +39,10 @@ interface DataItem {
 const DbConsole = () => {
   const [selectedModel, setSelectedModel] = useState<keyof typeof columns>('User');
   const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [editItem, setEditItem] = useState<DataItem | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { setLoading, loading } = useAppStore();
   const { toast } = useToast();
 
   const models = ['User', 'School', 'Mood'];
@@ -55,7 +57,13 @@ const DbConsole = () => {
   }, [selectedModel]);
 
   const fetchData = async () => {
-    setLoading(true);
+    setLoading({
+      isLoading: true,
+      message: `Loading ${selectedModel} data...`,
+      type: 'table',
+      rows: 5
+    });
+
     try {
       const response = await fetch(`/api/admin/data/${selectedModel.toLowerCase()}`);
       if (!response.ok) throw new Error('Failed to fetch data');
@@ -68,11 +76,19 @@ const DbConsole = () => {
         variant: 'destructive',
       });
     } finally {
-      setLoading(false);
+      setLoading({
+        isLoading: false
+      });
     }
   };
 
   const handleCreate = async (formData: any) => {
+    setLoading({
+      isLoading: true,
+      message: `Creating new ${selectedModel}...`,
+      type: 'form'
+    });
+
     try {
       const response = await fetch(`/api/admin/data/${selectedModel.toLowerCase()}`, {
         method: 'POST',
@@ -89,10 +105,20 @@ const DbConsole = () => {
         description: 'Failed to create record',
         variant: 'destructive',
       });
+    } finally {
+      setLoading({
+        isLoading: false
+      });
     }
   };
 
   const handleUpdate = async (formData: any) => {
+    setLoading({
+      isLoading: true,
+      message: `Updating ${selectedModel}...`,
+      type: 'form'
+    });
+
     try {
       if (!editItem) return;
       const response = await fetch(`/api/admin/data/${selectedModel.toLowerCase()}`, {
@@ -111,11 +137,21 @@ const DbConsole = () => {
         description: 'Failed to update record',
         variant: 'destructive',
       });
+    } finally {
+      setLoading({
+        isLoading: false
+      });
     }
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this record?')) return;
+
+    setLoading({
+      isLoading: true,
+      message: `Deleting ${selectedModel}...`,
+      type: 'overlay'
+    });
 
     try {
       const response = await fetch(`/api/admin/data/${selectedModel.toLowerCase()}`, {
@@ -137,6 +173,10 @@ const DbConsole = () => {
         description: 'Failed to delete record',
         variant: 'destructive',
       });
+    } finally {
+      setLoading({
+        isLoading: false
+      });
     }
   };
 
@@ -154,7 +194,7 @@ const DbConsole = () => {
             value={selectedModel}
             onValueChange={(value: typeof selectedModel) => setSelectedModel(value)}
           >
-            <SelectTrigger className="w-[180px] ">
+            <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Select model" />
             </SelectTrigger>
             <SelectContent className="bg-white shadow-lg border-gray-200 min-w-[280px]">
@@ -202,9 +242,9 @@ const DbConsole = () => {
           <Button
             variant="outline"
             onClick={fetchData}
-            disabled={loading}
+            disabled={loading.isLoading}
           >
-            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-4 w-4 ${loading.isLoading ? 'animate-spin' : ''}`} />
           </Button>
         </div>
       </div>
@@ -220,15 +260,7 @@ const DbConsole = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {loading ? (
-              <TableRow>
-                <TableCell colSpan={columns[selectedModel].length + 1} className="text-center py-8">
-                  <div className="flex items-center justify-center">
-                    <Loader2 className="h-6 w-6 animate-spin" />
-                  </div>
-                </TableCell>
-              </TableRow>
-            ) : filteredData.length === 0 ? (
+            {filteredData.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={columns[selectedModel].length + 1} className="text-center py-8">
                   No data found
@@ -277,6 +309,7 @@ const DbConsole = () => {
           </TableBody>
         </Table>
       </div>
+      <LoadingOverlay />
     </div>
   );
 };
@@ -313,7 +346,7 @@ const renderCellContent = (value: any, column: string) => {
               variant="outline"
               className="text-xs"
               style={{
-                backgroundColor: schoolUser.school.color + '20', // Add transparency
+                backgroundColor: schoolUser.school.color + '20',
                 borderColor: schoolUser.school.color
               }}
             >

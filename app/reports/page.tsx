@@ -2,11 +2,12 @@
 import React, { useState, useEffect } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, LineChart, Line, PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
-import { Loader2, CalendarIcon } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, LineChart, Line, PieChart, Pie, Cell, ResponsiveContainer, Label } from 'recharts';
 import { DatePickerWithPresets } from '@/components/DatePickerWithPresets';
-import { format } from 'date-fns';
 import { WeekPickerWithPresets } from '@/components/WeekPickerWithPresets';
+import { LoadingOverlay } from '@/components/LoadingOverlay';
+import { useAppStore } from '@/store/useAppStore';
+import { format } from 'date-fns';
 
 const COLORS = ['#4CAF50', '#FFC107', '#F44336'];
 
@@ -29,70 +30,105 @@ const ReportsPage: React.FC = () => {
   const [schools, setSchools] = useState<School[]>([]);
   const [selectedSchool, setSelectedSchool] = useState<string>('');
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [selectedWeek, setSelectedWeek] = useState<Date>(new Date());
   const [dailyData, setDailyData] = useState<ChartData[]>([]);
   const [weeklyData, setWeeklyData] = useState<ChartData[]>([]);
   const [monthlyData, setMonthlyData] = useState<ChartData[]>([]);
   const [comparisonData, setComparisonData] = useState<ChartData[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedWeek, setSelectedWeek] = useState<Date>(new Date());
 
-  // Fetch schools (unchanged)
+  const { setLoading } = useAppStore();
+
+  // Fetch schools
   useEffect(() => {
-    fetch('/api/schools')
-      .then(res => res.json())
-      .then(data => {
+    const fetchSchools = async () => {
+      setLoading({
+        isLoading: true,
+        message: 'Loading schools...',
+        type: 'content'
+      });
+
+      try {
+        const response = await fetch('/api/schools');
+        const data = await response.json();
         setSchools(data);
         if (data.length > 0) {
           setSelectedSchool(data[0].id);
         }
-      });
+      } catch (error) {
+        console.error('Error fetching schools:', error);
+      } finally {
+        setLoading({
+          isLoading: false
+        });
+      }
+    };
+
+    fetchSchools();
   }, []);
 
-  // Fetch school comparison data (unchanged)
+  // Fetch school comparison data
   useEffect(() => {
-    fetch('/api/reports/comparison')
-      .then(res => res.json())
-      .then(data => setComparisonData(data))
-      .catch(error => console.error('Error fetching comparison data:', error));
+    const fetchComparisonData = async () => {
+      setLoading({
+        isLoading: true,
+        message: 'Loading comparison data...',
+        type: 'content'
+      });
+
+      try {
+        const response = await fetch('/api/reports/comparison');
+        const data = await response.json();
+        setComparisonData(data);
+      } catch (error) {
+        console.error('Error fetching comparison data:', error);
+      } finally {
+        setLoading({
+          isLoading: false
+        });
+      }
+    };
+
+    fetchComparisonData();
   }, []);
 
-  // Modified fetch report data to include date for daily data
+  // Fetch report data
   useEffect(() => {
     if (!selectedSchool) return;
 
-    setLoading(true);
+    const fetchReportData = async () => {
+      setLoading({
+        isLoading: true,
+        message: 'Loading report data...',
+        type: 'content'
+      });
 
-    Promise.all([
-      fetch(`/api/reports/daily?schoolId=${selectedSchool}&date=${format(selectedDate, 'yyyy-MM-dd')}`),
-      fetch(`/api/reports/weekly?schoolId=${selectedSchool}&week=${format(selectedWeek, 'yyyy-MM-dd')}`),
-      fetch(`/api/reports/monthly?schoolId=${selectedSchool}`)
-    ])
-      .then(([dailyRes, weeklyRes, monthlyRes]) =>
-        Promise.all([
+      try {
+        const [dailyRes, weeklyRes, monthlyRes] = await Promise.all([
+          fetch(`/api/reports/daily?schoolId=${selectedSchool}&date=${format(selectedDate, 'yyyy-MM-dd')}`),
+          fetch(`/api/reports/weekly?schoolId=${selectedSchool}&week=${format(selectedWeek, 'yyyy-MM-dd')}`),
+          fetch(`/api/reports/monthly?schoolId=${selectedSchool}`)
+        ]);
+
+        const [daily, weekly, monthly] = await Promise.all([
           dailyRes.json(),
           weeklyRes.json(),
           monthlyRes.json()
-        ])
-      )
-      .then(([daily, weekly, monthly]) => {
+        ]);
+
         setDailyData(daily);
         setWeeklyData(weekly);
         setMonthlyData(monthly);
-        setLoading(false);
-      })
-      .catch(error => {
+      } catch (error) {
         console.error('Error fetching report data:', error);
-        setLoading(false);
-      });
-  }, [selectedSchool, selectedDate, selectedWeek]);
+      } finally {
+        setLoading({
+          isLoading: false
+        });
+      }
+    };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    );
-  }
+    fetchReportData();
+  }, [selectedSchool, selectedDate, selectedWeek]);
 
   return (
     <div className="p-4 max-w-7xl mx-auto">
@@ -119,10 +155,7 @@ const ReportsPage: React.FC = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle>Daily Feedback</CardTitle>
-            <DatePickerWithPresets
-              date={selectedDate}
-              setDate={setSelectedDate}
-            />
+            <DatePickerWithPresets date={selectedDate} setDate={setSelectedDate} />
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -156,25 +189,64 @@ const ReportsPage: React.FC = () => {
           </CardContent>
         </Card>
 
+        {/* Weekly Chart section of the ReportsPage */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle>Weekly Trend</CardTitle>
-            <WeekPickerWithPresets
-              date={selectedWeek}
-              setDate={setSelectedWeek}
-            />
+            <WeekPickerWithPresets date={selectedWeek} setDate={setSelectedWeek} />
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={weeklyData}>
+              <BarChart
+                data={weeklyData}
+                margin={{
+                  top: 20,
+                  right: 30,
+                  left: 20,
+                  bottom: 5,
+                }}
+              >
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="HAPPY" fill="#4CAF50" />
-                <Bar dataKey="OKAY" fill="#FFC107" />
-                <Bar dataKey="UNHAPPY" fill="#F44336" />
+                <XAxis
+                  dataKey="name"
+                  padding={{ left: 10, right: 10 }}
+                />
+                <YAxis>
+                  <Label
+                    value="Number of responses"
+                    angle={-90}
+                    position="insideLeft"
+                    style={{ textAnchor: 'middle' }}
+                  />
+                </YAxis>
+                <Tooltip
+                  formatter={(value) => {
+                    return typeof value === 'string'
+                      ? value.charAt(0).toUpperCase() + value.slice(1).toLowerCase()
+                      : value;
+                  }}
+                />
+                <Legend
+                  formatter={(value) => value.charAt(0) + value.slice(1).toLowerCase()}
+                />
+                <Bar
+                  dataKey="HAPPY"
+                  fill="#4CAF50"
+                  name="Happy"
+                  radius={[4, 4, 0, 0]}
+                />
+                <Bar
+                  dataKey="OKAY"
+                  fill="#FFC107"
+                  name="Okay"
+                  radius={[4, 4, 0, 0]}
+                />
+                <Bar
+                  dataKey="UNHAPPY"
+                  fill="#F44336"
+                  name="Unhappy"
+                  radius={[4, 4, 0, 0]}
+                />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -220,6 +292,8 @@ const ReportsPage: React.FC = () => {
           </ResponsiveContainer>
         </CardContent>
       </Card>
+
+      <LoadingOverlay />
     </div>
   );
 };

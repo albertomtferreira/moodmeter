@@ -11,8 +11,8 @@ import { useAuthStore } from '@/store/useAuthStore';
 
 interface AuthModalProps {
   isOpen: boolean;
-  onCancel: () => void;
-  onSuccess: () => void;
+  onCancel: VoidFunction;
+  onSuccess: VoidFunction;
 }
 
 export function AuthModal({ isOpen, onSuccess, onCancel }: AuthModalProps) {

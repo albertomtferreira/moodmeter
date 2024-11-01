@@ -1,7 +1,7 @@
 // components/WeekPickerWithPresets.tsx
 "use client"
-
 import * as React from "react"
+import { Dispatch, SetStateAction } from 'react';
 import { addWeeks, startOfWeek, endOfWeek, format, isSameWeek } from "date-fns"
 import { Calendar as CalendarIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -10,13 +10,19 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils"
 
 interface WeekPickerProps {
-  date: Date
-  setDate: (date: Date) => void
+  date?: Date;
+  setDate: Dispatch<SetStateAction<Date>>;
 }
 
-export function WeekPickerWithPresets({ date, setDate }: WeekPickerProps) {
-  const weekStart = startOfWeek(date, { weekStartsOn: 1 }) // Start week on Monday
-  const weekEnd = endOfWeek(date, { weekStartsOn: 1 })
+export const WeekPickerWithPresets = ({ date, setDate }: WeekPickerProps) => {
+  const handleSelect = React.useCallback((newDate: Date | undefined) => {
+    if (newDate) {
+      setDate(newDate);
+    }
+  }, [setDate]);
+
+  const weekStart = date ? startOfWeek(date, { weekStartsOn: 1 }) : startOfWeek(new Date(), { weekStartsOn: 1 });
+  const weekEnd = date ? endOfWeek(date, { weekStartsOn: 1 }) : endOfWeek(new Date(), { weekStartsOn: 1 });
 
   return (
     <Popover>
@@ -39,14 +45,14 @@ export function WeekPickerWithPresets({ date, setDate }: WeekPickerProps) {
           <Button
             variant="outline"
             className="flex-1 bg-white hover:bg-gray-100"
-            onClick={() => setDate(new Date())}
+            onClick={() => handleSelect(new Date())}
           >
             This Week
           </Button>
           <Button
             variant="outline"
             className="flex-1 bg-white hover:bg-gray-100"
-            onClick={() => setDate(addWeeks(new Date(), -1))}
+            onClick={() => handleSelect(addWeeks(new Date(), -1))}
           >
             Last Week
           </Button>
@@ -55,9 +61,10 @@ export function WeekPickerWithPresets({ date, setDate }: WeekPickerProps) {
           <Calendar
             mode="single"
             selected={date}
-            onSelect={(date) => date && setDate(date)}
+            onSelect={handleSelect}
             initialFocus
             className="bg-white"
+            weekStartsOn={1}
             modifiers={{
               selected: (date) => isSameWeek(date, weekStart, { weekStartsOn: 1 }),
             }}
