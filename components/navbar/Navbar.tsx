@@ -20,7 +20,6 @@ const Navbar = () => {
         <Link href="/">
           <img src="/assets/images/LogoHorizontal.svg" alt="Logo" className="h-20" />
         </Link>
-
       </div>
       <RightMenu />
     </div>

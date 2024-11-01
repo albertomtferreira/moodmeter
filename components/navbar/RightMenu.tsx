@@ -129,7 +129,7 @@ const RightMenu: React.FC = () => {
         <Button
           variant="secondary"
           size="icon"
-          className="absolute right-10 top-4 text-white font-bold w-40 rounded-lg text-lg"
+          className="absolute sm:right-10 right-4 top-4 text-white font-bold sm:w-40 w-auto p-2 sm:p-0 rounded-lg text-lg"
         >
           Select School
         </Button>
