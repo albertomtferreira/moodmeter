@@ -7,7 +7,9 @@ import { DatePickerWithPresets } from '@/components/DatePickerWithPresets';
 import { WeekPickerWithPresets } from '@/components/WeekPickerWithPresets';
 import { LoadingOverlay } from '@/components/LoadingOverlay';
 import { useAppStore } from '@/store/useAppStore';
-import { format } from 'date-fns';
+import { endOfMonth, format, startOfMonth } from 'date-fns';
+
+import { TermPickerWithPresets } from '@/components/TermPickerWithPresets';
 
 const COLORS = ['#4CAF50', '#FFC107', '#F44336'];
 
@@ -26,6 +28,11 @@ interface ChartData {
   UNHAPPY?: number;
 }
 
+interface DateRange {
+  from: Date;
+  to: Date;
+}
+
 const ReportsPage: React.FC = () => {
   const [schools, setSchools] = useState<School[]>([]);
   const [selectedSchool, setSelectedSchool] = useState<string>('');
@@ -35,6 +42,10 @@ const ReportsPage: React.FC = () => {
   const [weeklyData, setWeeklyData] = useState<ChartData[]>([]);
   const [monthlyData, setMonthlyData] = useState<ChartData[]>([]);
   const [comparisonData, setComparisonData] = useState<ChartData[]>([]);
+  const [monthlyRange, setMonthlyRange] = useState<DateRange>({
+    from: startOfMonth(new Date(new Date().getFullYear(), 0, 1)), // Start of current year
+    to: endOfMonth(new Date()) // End of current month
+  });
 
   const { setLoading } = useAppStore();
 
@@ -106,7 +117,7 @@ const ReportsPage: React.FC = () => {
         const [dailyRes, weeklyRes, monthlyRes] = await Promise.all([
           fetch(`/api/reports/daily?schoolId=${selectedSchool}&date=${format(selectedDate, 'yyyy-MM-dd')}`),
           fetch(`/api/reports/weekly?schoolId=${selectedSchool}&week=${format(selectedWeek, 'yyyy-MM-dd')}`),
-          fetch(`/api/reports/monthly?schoolId=${selectedSchool}`)
+          fetch(`/api/reports/monthly?schoolId=${selectedSchool}&from=${format(monthlyRange.from, 'yyyy-MM-dd')}&to=${format(monthlyRange.to, 'yyyy-MM-dd')}`)
         ]);
 
         const [daily, weekly, monthly] = await Promise.all([
@@ -253,9 +264,16 @@ const ReportsPage: React.FC = () => {
         </Card>
       </div>
 
+      {/* MONTHLY CHART */}
+
+
       <Card className="mb-4">
-        <CardHeader>
-          <CardTitle>Monthly Satisfaction Rate</CardTitle>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle>Monthly Satisfaction Rate </CardTitle>
+          <TermPickerWithPresets
+            range={monthlyRange}
+            setRange={setMonthlyRange}
+          />
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={300}>
