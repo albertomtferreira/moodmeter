@@ -5,6 +5,8 @@ import { NextResponse } from 'next/server';
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const schoolId = searchParams.get('schoolId');
+  const from = searchParams.get('from');
+  const to = searchParams.get('to');
 
   if (!schoolId) {
     return NextResponse.json({ error: 'School ID is required' }, { status: 400 });
@@ -18,7 +20,8 @@ export async function GET(request: Request) {
       where: {
         schoolId,
         timestamp: {
-          gte: monthStart
+          gte: from ? new Date(from) : undefined,
+          lte: to ? new Date(to) : undefined,
         }
       },
       orderBy: {
