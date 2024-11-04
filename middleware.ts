@@ -6,6 +6,9 @@ import { prisma } from '@/lib/prisma';
 export default authMiddleware({
   publicRoutes: [
     "/",
+    "/about",
+    "/pricing",
+    "/contact",
     "/api/webhook/clerk",
     "/sign-in(.*)",
     "/sign-up(.*)",

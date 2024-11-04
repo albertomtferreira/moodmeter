@@ -2,16 +2,12 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import Navbar from "@/components/navbar/Navbar";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Providers } from "@/components/Providers";
 import { Toaster } from "@/components/ui/toaster";
-import { Suspense } from "react";
-import { LoadingOverlay } from "@/components/LoadingOverlay";
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
-
-
+import { LoadingOverlay } from "@/components/LoadingOverlay";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -55,38 +51,20 @@ export const metadata: Metadata = {
     apple: '/assets/icons/Logo.png',
   },
   manifest: '/manifest.json',
-  applicationName: 'MoodMeter',
+  themeColor: '#4CAF50',
   appleWebApp: {
     capable: true,
-    title: 'MoodMeter',
     statusBarStyle: 'default',
+    title: 'MoodMeter',
   },
   formatDetection: {
     telephone: false,
   },
-  themeColor: '#4CAF50',
-}
-
-// Loading component for the main content
-function MainLoadingFallback() {
-  return (
-    <div className="flex-1 flex items-center justify-center">
-      <LoadingOverlay />
-    </div>
-  );
-}
-
-// Loading component for the navbar
-function NavbarLoadingFallback() {
-  return (
-    <div className="h-20 bg-background border-b animate-pulse">
-      <div className="container mx-auto px-4 h-full flex items-center justify-between">
-        <div className="w-10 h-10 bg-gray-200 rounded" />
-        <div className="w-32 h-10 bg-gray-200 rounded" />
-        <div className="w-10 h-10 bg-gray-200 rounded" />
-      </div>
-    </div>
-  );
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 1,
+  },
 }
 
 export default function RootLayout({
@@ -104,24 +82,11 @@ export default function RootLayout({
       >
         <ClerkProvider>
           <Providers>
-            <div className="relative flex min-h-screen flex-col">
-              <Suspense fallback={<NavbarLoadingFallback />}>
-                <Navbar />
-              </Suspense>
-
-              <main className="flex-1">
-                <Suspense fallback={<MainLoadingFallback />}>
-                  {children}
-                  <Analytics />
-                  <SpeedInsights />
-                </Suspense>
-              </main>
-
-              <Toaster />
-
-              {/* LoadingOverlay will be shown when global loading state is true */}
-              <LoadingOverlay />
-            </div>
+            {children}
+            <Toaster />
+            <Analytics />
+            <SpeedInsights />
+            <LoadingOverlay />
           </Providers>
         </ClerkProvider>
       </body>
