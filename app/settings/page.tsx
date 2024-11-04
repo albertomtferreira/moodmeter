@@ -7,10 +7,11 @@ import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { ContentSkeleton } from '@/components/LoadingOverlay';
 import DbConsole from '@/components/DbConsole';
 import { DebugProtectedRoute } from '@/components/debug/DebugProtectedRoute';
-import { UserButton, UserProfile } from '@clerk/nextjs';
 import UserProfileModal from '@/components/UserProfileModal';
 import UserSchools from '@/components/UserSchools';
 import { Button } from '@/components/ui/button';
+import { useState } from 'react';
+import UpdatePinModal from '@/components/UpdatePinModal';
 
 
 interface SettingsSectionProps {
@@ -34,6 +35,7 @@ const SettingsSection = ({ title, feature, children }: SettingsSectionProps) => 
 
 export default function SettingsPage() {
   const { canAccess, role, isLoading: permissionsLoading } = usePermissions();
+  const [isPinModalOpen, setIsPinModalOpen] = useState(false);
 
 
   if (permissionsLoading) {
@@ -106,9 +108,17 @@ export default function SettingsPage() {
                           Your PIN is used for secure actions
                         </p>
                       </div>
-                      <Button variant="secondary">
+                      <Button
+                        variant="secondary"
+                        onClick={() => setIsPinModalOpen(true)}
+                      >
                         Update PIN
                       </Button>
+
+                      <UpdatePinModal
+                        isOpen={isPinModalOpen}
+                        onClose={() => setIsPinModalOpen(false)}
+                      />
                     </div>
                   </SettingsSection>
                 </CardContent>
