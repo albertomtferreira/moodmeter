@@ -73,7 +73,7 @@ const RightMenu: React.FC = () => {
   const handleSchoolSelect = (userSchool: UserSchool) => {
     setSelectedSchool(userSchool.school);
     closeMenu();
-    router.push('/');
+    router.push('/dashboard');
     toast({
       title: "School Selected",
       description: `You've selected ${userSchool.school.name}`,
