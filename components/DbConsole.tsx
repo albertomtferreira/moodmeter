@@ -187,6 +187,7 @@ const DbConsole = () => {
   );
 
   return (
+
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
@@ -194,6 +195,7 @@ const DbConsole = () => {
             value={selectedModel}
             onValueChange={(value: typeof selectedModel) => setSelectedModel(value)}
           >
+            {/* DropDown selector */}
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Select model" />
             </SelectTrigger>
@@ -203,7 +205,7 @@ const DbConsole = () => {
               ))}
             </SelectContent>
           </Select>
-
+          {/* Search Box */}
           <div className="relative">
             <SearchIcon className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
             <Input
@@ -217,12 +219,14 @@ const DbConsole = () => {
 
         <div className="flex items-center gap-2">
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            {/* BUG - Issue  31 - errors on setEdiItem*/}
             <DialogTrigger asChild>
               <Button className="gap-2">
                 <PlusCircle className="h-4 w-4" />
                 Add New
               </Button>
             </DialogTrigger>
+
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>{editItem ? 'Edit' : 'Add New'} {selectedModel}</DialogTitle>
@@ -315,6 +319,7 @@ const DbConsole = () => {
 };
 
 const renderCellContent = (value: any, column: string) => {
+
   if (value === null || value === undefined) return '-';
 
   if (typeof value === 'boolean') {
@@ -331,6 +336,23 @@ const renderCellContent = (value: any, column: string) => {
 
   if (column === 'pin') {
     return '••••••';
+  }
+
+  if (column === 'color' && value) {
+    let color = value
+    return (
+      <Badge
+        key={color}
+        variant="outline"
+        className="text-xs"
+        style={{
+          backgroundColor: color + '20',
+          borderColor: color
+        }}
+      >
+        {color}
+      </Badge>
+    )
   }
 
   if (column === 'schools' && Array.isArray(value)) {
