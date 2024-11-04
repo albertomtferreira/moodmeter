@@ -1,7 +1,7 @@
 // app/settings/page.tsx
 "use client"
 import { usePermissions } from '@/hooks/usePermissions';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { ContentSkeleton } from '@/components/LoadingOverlay';
@@ -10,6 +10,8 @@ import { DebugProtectedRoute } from '@/components/debug/DebugProtectedRoute';
 import { UserButton, UserProfile } from '@clerk/nextjs';
 import UserProfileModal from '@/components/UserProfileModal';
 import UserSchools from '@/components/UserSchools';
+import { Button } from '@/components/ui/button';
+
 
 interface SettingsSectionProps {
   title: string;
@@ -61,48 +63,58 @@ export default function SettingsPage() {
             </TabsTrigger>
           ))}
         </TabsList>
-
         <div className="mt-6 space-y-6">
+
           <TabsContent value="user">
-            <Card>
-              <CardHeader>
-                <CardTitle>User Settings</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <SettingsSection
-                  title="Update Your Personal Details"
-                  feature="settings.userManagement"
-                >
-                  {/* Add your school settings form here */}
-                  <div className="space-y-4">
-                    <div className="text-sm text-muted-foreground mb-2">
-                      Update your personal information, email, and profile settings
-                    </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-6 max-w-7xl mx-auto">
+              {/* Personal Details Card */}
+              <Card className="w-full">
+                <CardHeader>
+                  <CardTitle className="text-xl font-semibold">Personal Details</CardTitle>
+                  <CardDescription>
+                    Manage your profile information and account settings
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <SettingsSection
+                    title=""
+                    feature="settings.userManagement"
+
+                  >
                     <UserProfileModal />
-                  </div>
-                </SettingsSection>
-                <SettingsSection
-                  title="School Management"
-                  feature="settings.userManagement"
-                >
-                  <div className="space-y-4">
-                    <div className="text-sm text-muted-foreground mb-2">
-                      Manage your school assignments and set your preferred school
+                  </SettingsSection>
+                </CardContent>
+              </Card>
+
+              {/* PIN Management Card */}
+              <Card className="w-full">
+                <CardHeader>
+                  <CardTitle className="text-xl font-semibold">Update PIN</CardTitle>
+                  <CardDescription>
+                    Manage your security PIN for account access
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <SettingsSection
+                    title=""
+                    feature="settings.updatePin"
+
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <p className="text-sm text-muted-foreground">
+                          Your PIN is used for secure actions
+                        </p>
+                      </div>
+                      <Button variant="secondary">
+                        Update PIN
+                      </Button>
                     </div>
-                    <UserSchools />
-                  </div>
-                </SettingsSection>
-                <SettingsSection
-                  title="PIN Management"
-                  feature="settings.updatePin"
-                >
-                  {/* Add your PIN update form here */}
-                  <div className="text-sm text-muted-foreground">
-                    Update your access PIN
-                  </div>
-                </SettingsSection>
-              </CardContent>
-            </Card>
+                  </SettingsSection>
+                </CardContent>
+              </Card>
+            </div>
+            <UserSchools />
           </TabsContent>
 
           <TabsContent value="admin">
