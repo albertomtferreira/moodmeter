@@ -237,21 +237,25 @@ const HomePage = () => {
         className="bg-background flex flex-col items-center px-4 py-2 sm:px-8 sm:py-4"
         style={{ height: viewportHeight, maxHeight: viewportHeight }}
       >
+
+
         {/* Header Section */}
         <div className="w-full max-w-6xl flex justify-center pt-2">
-          <div
-            className={`
-              inline-block px-4 py-2 rounded-full text-sm sm:text-base font-medium shadow-md 
-              transition-all duration-300 ease-in-out max-w-[90vw] truncate
-              ${selectedSchool ? 'opacity-100 transform translate-y-0 text-white' : 'transform -translate-y-4 text-black'}
-            `}
-            style={{ backgroundColor: selectedSchool?.color || 'transparent' }}
+          <h1
+            className={`text-center text-lg sm:text-xl font-medium transition-all duration-300 ease-in-out max-w-[90vw] 
+              ${selectedSchool
+                ? 'opacity-100 transform translate-y-0'
+                : 'transform -translate-y-4'
+              }
+              `}
           >
             {selectedSchool
-              ? `Share your feedback for ${selectedSchool.name}`
-              : 'Please select a school from the menu on the top right'}
-          </div>
+              ? <>Providing feedback for <span className='font-bold shadow-md rounded-md' style={{ color: selectedSchool.color }}>{selectedSchool.name}</span></>
+              : 'Please select a school from the menu on the top right'
+            }
+          </h1>
         </div>
+
 
         {/* School Selection Modal */}
         <Dialog open={showModal} onOpenChange={setShowModal}>
