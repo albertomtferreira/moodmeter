@@ -17,7 +17,7 @@ const Navbar = () => {
     <div className='flex flex-row justify-between items-center'>
       <LeftMenu />
       <div className='top-4 mx-auto'>
-        <Link href="/">
+        <Link href="/dashboard">
           <img src="/assets/images/LogoHorizontal.svg" alt="Logo" className="h-20" />
         </Link>
       </div>

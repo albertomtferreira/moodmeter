@@ -71,7 +71,7 @@ const LeftMenu: React.FC = () => {
 
   const MenuContent = () => (
     <nav className="flex flex-col space-y-4">
-      <Link href="/" passHref>
+      <Link href="/dashboard" passHref>
         <Button variant="ghost" className="justify-start w-full" onClick={closeMenu}>
           <Home className="mr-2" /> Home
         </Button>
