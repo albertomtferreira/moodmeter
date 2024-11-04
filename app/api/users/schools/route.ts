@@ -29,10 +29,13 @@ export async function GET() {
     });
 
     // Transform the data to match the frontend requirements
-    const formattedSchools = userSchools.map(({ school, isPreferred }) => ({
-      school,
-      isPreferred,
-    }));
+    const formattedSchools = userSchools.sort((a, b) =>
+      a.school.name.toLowerCase().localeCompare(b.school.name.toLowerCase())
+    )
+      .map(({ school, isPreferred }) => ({
+        school,
+        isPreferred,
+      }));
 
     return NextResponse.json(formattedSchools);
   } catch (error) {
