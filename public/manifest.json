@@ -4,9 +4,10 @@
   "description": "Instant mood tracking and feedback analysis for improved experiences",
   "start_url": "/dashboard",
   "display": "standalone",
+  "display_override": ["window-controls-overlay"],
   "background_color": "#FFFFFF",
   "theme_color": "#4CAF50",
-  "orientation": "portrait-primary",
+  "orientation": "any",
   "icons": [
     {
       "src": "/assets/icons/icon-192x192.png",
