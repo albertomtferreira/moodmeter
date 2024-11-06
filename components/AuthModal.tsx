@@ -37,16 +37,16 @@ export function AuthModal({ isOpen, onSuccess, onCancel }: AuthModalProps) {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
-
+    let usernameLowerCase = username.toLocaleLowerCase()
     try {
-      console.log('Submitting auth request:', { username, pin });
+      console.log('Submitting auth request:', { usernameLowerCase, pin });
 
       const response = await fetch('/api/auth/verify', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ username, pin }),
+        body: JSON.stringify({ usernameLowerCase, pin }),
       });
 
       const data = await response.json();
