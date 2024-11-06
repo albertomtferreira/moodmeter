@@ -4,88 +4,88 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("POSTGRES_PRISMA_URL")
+  provider  = "postgresql"
+  url       = env("POSTGRES_PRISMA_URL")
   directUrl = env("POSTGRES_URL_NON_POOLING")
 }
 
 model User {
-  id            String         @id @default(cuid())
-  clerkId       String         @unique  // To link with Clerk user
-  username      String         @unique
-  email         String         @unique
-  name          String?
-  pin           String         @default("000000")
-  role          UserRole       @default(VIEWER)
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  schools       SchoolUser[]   
-  settings      UserSettings?
+  id        String        @id @default(cuid())
+  clerkId   String        @unique // To link with Clerk user
+  username  String        @unique
+  email     String        @unique
+  name      String?
+  pin       String        @default("000000")
+  role      UserRole      @default(VIEWER)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  schools   SchoolUser[]
+  settings  UserSettings?
 }
 
 model School {
-  id            String         @id @default(cuid())
-  name          String
-  code          String         @unique  // For easy identification
-  color         String         // School's theme color
-  isActive      Boolean        @default(true)
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  users         SchoolUser[]   // Many-to-many relation with users
-  moods         Mood[]         // One-to-many relation with moods
-  settings      SchoolSettings? // One-to-one relation with settings
+  id        String          @id @default(cuid())
+  name      String
+  code      String          @unique // For easy identification
+  color     String // School's theme color
+  isActive  Boolean         @default(true)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  users     SchoolUser[] // Many-to-many relation with users
+  moods     Mood[] // One-to-many relation with moods
+  settings  SchoolSettings? // One-to-one relation with settings
 }
 
 model SchoolUser {
-  id            String     @id @default(cuid())
-  user          User       @relation(fields: [userId], references: [id])
-  userId        String
-  school        School     @relation(fields: [schoolId], references: [id])
-  schoolId      String
-  role          UserRole   @default(VIEWER)
-  isPreferred   Boolean    @default(false)  // Mark as preferred school
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
+  id          String   @id @default(cuid())
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String
+  school      School   @relation(fields: [schoolId], references: [id])
+  schoolId    String
+  role        UserRole @default(VIEWER)
+  isPreferred Boolean  @default(false) // Mark as preferred school
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@unique([userId, schoolId])
 }
 
 model Mood {
-  id            String     @id @default(cuid())
-  type          MoodType
-  school        School     @relation(fields: [schoolId], references: [id])
-  schoolId      String
-  timestamp     DateTime   @default(now())
-  period        Period     // Time of day
-  location      Location?  // Optional: specific location within school
-  createdAt     DateTime   @default(now())
+  id        String    @id @default(cuid())
+  type      MoodType
+  school    School    @relation(fields: [schoolId], references: [id])
+  schoolId  String
+  timestamp DateTime  @default(now())
+  period    Period // Time of day
+  location  Location? // Optional: specific location within school
+  createdAt DateTime  @default(now())
 
   @@index([schoolId, timestamp])
 }
 
 model UserSettings {
-  id                    String   @id @default(cuid())
-  user                  User     @relation(fields: [userId], references: [id])
-  userId                String   @unique
-  submissionCooldown    Int      @default(5000)  // Milliseconds between submissions
-  defaultPeriod         Period   @default(LUNCH)
-  defaultLocation       Location @default(CAFETERIA)
-  notificationsEnabled  Boolean  @default(true)
-  theme                 Theme    @default(LIGHT)
+  id                   String   @id @default(cuid())
+  user                 User     @relation(fields: [userId], references: [id])
+  userId               String   @unique
+  submissionCooldown   Int      @default(5000) // Milliseconds between submissions
+  defaultPeriod        Period   @default(LUNCH)
+  defaultLocation      Location @default(CAFETERIA)
+  notificationsEnabled Boolean  @default(true)
+  theme                Theme    @default(LIGHT)
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 }
 
 model SchoolSettings {
-  id                    String   @id @default(cuid())
-  school                School   @relation(fields: [schoolId], references: [id])
-  schoolId              String   @unique
-  allowAnonymous        Boolean  @default(true)
-  requireLocation       Boolean  @default(false)
-  customPeriods         String[] // Custom periods specific to this school
-  feedbackEnabled       Boolean  @default(true)
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
+  id              String   @id @default(cuid())
+  school          School   @relation(fields: [schoolId], references: [id])
+  schoolId        String   @unique
+  allowAnonymous  Boolean  @default(true)
+  requireLocation Boolean  @default(false)
+  customPeriods   String[] // Custom periods specific to this school
+  feedbackEnabled Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
 
 enum UserRole {
@@ -119,4 +119,44 @@ enum Theme {
   LIGHT
   DARK
   SYSTEM
+}
+
+// PWA Analytics
+model PWAInstallationEvent {
+  id           String               @id @default(cuid())
+  timestamp    DateTime             @default(now())
+  source       InstallationSource
+  stage        InstallationStage
+  platform     InstallationPlatform
+  errorMessage String?
+  userId       String? // Optional: link to user if logged in
+  deviceInfo   Json? // Store additional device information
+  createdAt    DateTime             @default(now())
+
+  @@index([timestamp])
+  @@index([source])
+  @@index([platform])
+  @@index([stage])
+}
+
+enum InstallationSource {
+  HERO_BUTTON
+  MOBILE_BANNER
+  BROWSER_PROMPT
+}
+
+enum InstallationStage {
+  PROMPTED
+  ACCEPTED
+  REJECTED
+  COMPLETED
+  FAILED
+}
+
+enum InstallationPlatform {
+  WINDOWS
+  MAC
+  ANDROID
+  IOS
+  OTHER
 }

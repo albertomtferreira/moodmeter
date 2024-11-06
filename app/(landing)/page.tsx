@@ -5,11 +5,23 @@ import { useEffect, useState } from 'react';
 import { ArrowRight, BarChart2, Shield, Zap, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { AnalyticsService } from '@/lib/services/analytics';
 
 export default function LandingPage() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [isInstallable, setIsInstallable] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
+  const [hasTrackedPrompt, setHasTrackedPrompt] = useState(false);
+
+  // Platform detection
+  const getPlatform = () => {
+    const userAgent = window.navigator.userAgent.toLowerCase();
+    if (/android/.test(userAgent)) return 'ANDROID';
+    if (/(iphone|ipad|ipod)/.test(userAgent)) return 'IOS';
+    if (/windows/.test(userAgent)) return 'WINDOWS';
+    if (/mac/.test(userAgent)) return 'MAC';
+    return 'OTHER';
+  };
 
   useEffect(() => {
     // Check if already installed
@@ -18,15 +30,36 @@ export default function LandingPage() {
     }
 
     // Listen for the beforeinstallprompt event
-    const handleBeforeInstallPrompt = (e: Event) => {
+    const handleBeforeInstallPrompt = async (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e);
       setIsInstallable(true);
+
+      // Track that PWA is installable
+      if (!hasTrackedPrompt) {
+        try {
+          await AnalyticsService.recordInstallationEvent({
+            source: 'BROWSER_PROMPT',
+            stage: 'PROMPTED',
+            platform: getPlatform(),
+            deviceInfo: {
+              userAgent: window.navigator.userAgent,
+              language: window.navigator.language,
+              platform: window.navigator.platform
+            }
+          });
+          setHasTrackedPrompt(true);
+        } catch (error) {
+          console.error('Failed to record installation prompt:', error);
+        }
+      }
     };
+
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
     // Listen for successful installation
+    // Remove this event listener since we'll track completion in handleInstallClick
     window.addEventListener('appinstalled', () => {
       setIsInstalled(true);
       setIsInstallable(false);
@@ -36,21 +69,66 @@ export default function LandingPage() {
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     };
-  }, []);
+  }, [hasTrackedPrompt]); // Add hasTrackedPrompt to dependencies
 
-  const handleInstallClick = async () => {
+  const handleInstallClick = async (source: 'HERO_BUTTON' | 'MOBILE_BANNER') => {
     if (!deferredPrompt) return;
 
     try {
+      // Track acceptance
+      await AnalyticsService.recordInstallationEvent({
+        source,
+        stage: 'ACCEPTED',
+        platform: getPlatform(),
+        deviceInfo: {
+          userAgent: window.navigator.userAgent,
+          language: window.navigator.language,
+          platform: window.navigator.platform
+        }
+      });
+
       await deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
 
       if (outcome === 'accepted') {
         setIsInstalled(true);
         setIsInstallable(false);
+        // Track completion here instead of in appinstalled event
+        await AnalyticsService.recordInstallationEvent({
+          source,
+          stage: 'COMPLETED',
+          platform: getPlatform(),
+          deviceInfo: {
+            userAgent: window.navigator.userAgent,
+            language: window.navigator.language,
+            platform: window.navigator.platform
+          }
+        });
+      } else {
+        await AnalyticsService.recordInstallationEvent({
+          source,
+          stage: 'REJECTED',
+          platform: getPlatform(),
+          deviceInfo: {
+            userAgent: window.navigator.userAgent,
+            language: window.navigator.language,
+            platform: window.navigator.platform
+          }
+        });
       }
     } catch (error) {
       console.error('Error installing PWA:', error);
+      await AnalyticsService.recordInstallationEvent({
+        source,
+        stage: 'FAILED',
+        platform: getPlatform(),
+        errorMessage: error instanceof Error ? error.message : 'Unknown error',
+        deviceInfo: {
+          userAgent: window.navigator.userAgent,
+          language: window.navigator.language,
+          platform: window.navigator.platform
+        }
+      });
     }
 
     setDeferredPrompt(null);
@@ -97,7 +175,7 @@ export default function LandingPage() {
                   size="lg"
                   variant="secondary"
                   className="px-8 bg-secondary/10 hover:bg-secondary/20"
-                  onClick={handleInstallClick}
+                  onClick={() => handleInstallClick('HERO_BUTTON')}
                 >
                   Install App
                   <Download className="ml-2 h-5 w-5" />
@@ -154,7 +232,7 @@ export default function LandingPage() {
             <Button
               size="sm"
               className="bg-primary text-white"
-              onClick={handleInstallClick}
+              onClick={() => handleInstallClick('MOBILE_BANNER')}
             >
               Install
               <Download className="ml-2 h-4 w-4" />
