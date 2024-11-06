@@ -20,10 +20,50 @@ body {
   color: var(--color-text);
 }
 
-
-
 h1, h2, h3, h4, h5, h6 {
   font-weight: 700;
+}
+
+/* Tablet Orientation Control */
+@media screen and (min-width: 768px) {
+  @media screen and (orientation: portrait) {
+    body::before {
+      content: "Please rotate your device to landscape mode for the best experience";
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--color-background);
+      color: var(--color-text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem;
+      z-index: 9999;
+      font-size: 1.25rem;
+      font-weight: 600;
+      font-family: 'Nunito', sans-serif;
+    }
+
+    body > * {
+      display: none;
+    }
+
+    body::before {
+      display: flex;
+    }
+  }
+}
+
+@media screen and (max-width: 767px) {
+  @media screen and (orientation: landscape) {
+    /* Allow phones to stay in portrait mode */
+    body {
+      display: block;
+    }
+  }
 }
 
 @layer components {
@@ -56,7 +96,6 @@ h1, h2, h3, h4, h5, h6 {
   .flex-between {
     @apply flex justify-between items-center;
   }
-
 }
 
 /* ========================================== CLERK STYLES */
