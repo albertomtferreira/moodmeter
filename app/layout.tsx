@@ -8,6 +8,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { LoadingOverlay } from "@/components/LoadingOverlay";
+import type { Viewport } from 'next'
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -19,6 +20,14 @@ const geistMono = localFont({
   variable: "--font-geist-mono",
   weight: "100 900",
 });
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: '#4CAF50'
+}
 
 export const metadata: Metadata = {
   title: 'MoodMeter - Instant Mood Tracking and Feedback Analysis',
@@ -51,7 +60,6 @@ export const metadata: Metadata = {
     apple: '/assets/icons/Logo.png',
   },
   manifest: '/manifest.json',
-  themeColor: '#4CAF50',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
@@ -59,12 +67,6 @@ export const metadata: Metadata = {
   },
   formatDetection: {
     telephone: false,
-  },
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
   },
 }
 
