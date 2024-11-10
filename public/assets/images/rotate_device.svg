@@ -1,0 +1,114 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <!-- Rotation animation -->
+        <animateTransform
+            id="rotateAnimation"
+            attributeName="transform"
+            attributeType="XML"
+            type="rotate"
+            from="0 100 100"
+            to="90 100 100"
+            dur="2s"
+            repeatCount="indefinite"
+            begin="0s"
+            fill="freeze"
+            calcMode="spline"
+            keySplines="0.4 0 0.2 1"
+        />
+        
+        <!-- Pulse animation for the arrow -->
+        <animate 
+            id="pulseAnimation"
+            attributeName="opacity"
+            values="1;0.4;1"
+            dur="2s"
+            repeatCount="indefinite"
+        />
+    </defs>
+    
+    <!-- Background circle -->
+    <circle cx="100" cy="100" r="90" 
+            fill="#f0f0f0" 
+            opacity="0.3"/>
+    
+    <!-- Phone container group -->
+    <g transform-origin="100 100">
+        <!-- Phone outline -->
+        <rect x="65" y="40" width="70" height="120" rx="12" 
+              fill="#4A90E2" 
+              stroke="#2171CD" 
+              stroke-width="4"/>
+        
+        <!-- Screen -->
+        <rect x="72" y="50" width="56" height="100" rx="6" 
+              fill="#FFFFFF"/>
+        
+        <!-- Home button -->
+        <circle cx="100" cy="160" r="4" 
+                fill="#FFFFFF"/>
+        
+        <!-- Screen content lines -->
+        <rect x="80" y="60" width="40" height="4" rx="2" fill="#E0E0E0"/>
+        <rect x="80" y="70" width="30" height="4" rx="2" fill="#E0E0E0"/>
+        <rect x="80" y="80" width="35" height="4" rx="2" fill="#E0E0E0"/>
+        
+        <!-- Apply rotation animation to phone -->
+        <animateTransform
+            attributeName="transform"
+            attributeType="XML"
+            type="rotate"
+            from="0 100 100"
+            to="90 100 100"
+            dur="2s"
+            repeatCount="indefinite"
+            begin="0s"
+            calcMode="spline"
+            keySplines="0.4 0 0.2 1"
+        />
+    </g>
+    
+    <!-- Curved arrow -->
+    <path d="M 160 100 A 60 60 0 1 1 100 40" 
+          fill="none" 
+          stroke="#4A90E2" 
+          stroke-width="6" 
+          stroke-linecap="round">
+        <animate 
+            attributeName="opacity"
+            values="1;0.4;1"
+            dur="2s"
+            repeatCount="indefinite"
+        />
+    </path>
+    
+    <!-- Arrow head -->
+    <path d="M 160 100 L 170 90 L 180 100" 
+          fill="none" 
+          stroke="#4A90E2" 
+          stroke-width="6" 
+          stroke-linecap="round" 
+          stroke-linejoin="round">
+        <animate 
+            attributeName="opacity"
+            values="1;0.4;1"
+            dur="2s"
+            repeatCount="indefinite"
+        />
+    </path>
+    
+    <!-- Text with fade animation -->
+    <text x="100" y="185" 
+          text-anchor="middle" 
+          font-family="Arial, sans-serif" 
+          font-size="16" 
+          font-weight="bold" 
+          fill="#4A90E2">
+        ROTATE DEVICE
+        <animate 
+            attributeName="opacity"
+            values="1;0.4;1"
+            dur="2s"
+            repeatCount="indefinite"
+        />
+    </text>
+</svg>

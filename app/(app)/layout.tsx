@@ -2,6 +2,7 @@
 import { Suspense } from "react";
 import Navbar from "@/components/navbar/Navbar";
 import { LoadingOverlay } from "@/components/LoadingOverlay";
+import "./tablet_orientation.css";
 
 // Loading component for the main content
 function MainLoadingFallback() {
