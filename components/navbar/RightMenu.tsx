@@ -77,7 +77,7 @@ const RightMenu: React.FC = () => {
     toast({
       title: "School Selected",
       description: `You've selected ${userSchool.school.name}`,
-      duration: 3000,
+      duration: 2000,
       style: {
         backgroundColor: userSchool.school.color,
         color: 'white',
