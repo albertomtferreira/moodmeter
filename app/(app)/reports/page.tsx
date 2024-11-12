@@ -163,6 +163,7 @@ const ReportsPage: React.FC = () => {
       </Select>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        {/* DAILY CHART section of the ReportsPage */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle>Daily Feedback</CardTitle>
@@ -182,7 +183,12 @@ const ReportsPage: React.FC = () => {
                   label={({ name, value, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                 >
                   {dailyData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={
+                        COLORS[index % COLORS.length]
+                      }
+                    />
                   ))}
                 </Pie>
                 <Tooltip
