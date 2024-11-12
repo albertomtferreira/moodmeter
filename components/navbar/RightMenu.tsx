@@ -7,9 +7,11 @@ import { School } from '@/types';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { useSchoolStore } from '@/store/useSchoolStore';
-import { SignedIn, useAuth } from '@clerk/nextjs';
+import { SignedIn, SignedOut, useAuth } from '@clerk/nextjs';
 import { ContentSkeleton, LoadingOverlay } from '../LoadingOverlay';
 import { useAppStore } from '@/store/useAppStore';
+import Link from 'next/link';
+import { LogIn } from 'lucide-react';
 
 interface UserSchool {
   school: School;
@@ -141,6 +143,17 @@ const RightMenu: React.FC = () => {
             <SchoolGrid />
           </div>
         </SignedIn>
+        <SignedOut>
+          <Link href="/sign-in">
+            <Button
+              variant="ghost"
+              className="justify-center w-full"
+              onClick={closeMenu}
+            >
+              <LogIn className="mr-2" /> Login
+            </Button>
+          </Link>
+        </SignedOut>
       </SheetContent>
     </Sheet>
   );
