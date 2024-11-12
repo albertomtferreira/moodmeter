@@ -186,7 +186,10 @@ const ReportsPage: React.FC = () => {
                     <Cell
                       key={`cell-${index}`}
                       fill={
-                        COLORS[index % COLORS.length]
+                        entry.name === 'HAPPY' ? '#4CAF50' :
+                          entry.name === 'OKAY' ? '#FFC107' :
+                            entry.name === 'UNHAPPY' ? '#F44336' :
+                              COLORS[index % COLORS.length]
                       }
                     />
                   ))}
