@@ -165,7 +165,7 @@ export default function LandingPage() {
                 variant="outline"
                 className="px-8"
               >
-                <Link href="/feedback">
+                <Link href="/">
                   Try Demo
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>

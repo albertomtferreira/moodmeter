@@ -1,8 +1,14 @@
+import NavBar from "../(landing)/_components/NavBar"
+
 const Layout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div className="flex-center min-h-screen w-full bg-background bg-cover bg-fixed bg-center">
-      {children}
-    </div>
+    <>
+      <NavBar />
+      <div className="flex-center min-h-screen w-full bg-background bg-cover bg-fixed bg-center">
+        {children}
+      </div>
+    </>
+
   )
 }
 
