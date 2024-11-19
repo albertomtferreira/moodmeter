@@ -18,7 +18,8 @@ import WeeklySubmissionsChart from './_components/WeeklySubmissionsChart';
 import DailyTimeAnalysis from './_components/DailyTimeAnalysis';
 import WeeklyTrendChart from './_components/WeeklyTrendChart';
 import MonthlySatisfactionChart from './_components/MonthlySatisfactionChart';
-import SchoolComparisonChart from './_components/SchoolComparisonChart';
+// import SchoolComparisonChart from './_components/SchoolComparisonChart';
+
 
 interface School {
   id: string;
@@ -40,6 +41,11 @@ interface DateRange {
   to: Date;
 }
 
+interface UserSchool {
+  school: School;
+  isPreferred: boolean;
+}
+
 const SectionHeader = ({ title, children }: { title: string; children?: React.ReactNode }) => (
   <div className="flex justify-between items-center mb-4 m-4">
     <h2 className="text-3xl underline font-semibold">{title}</h2>
@@ -48,74 +54,117 @@ const SectionHeader = ({ title, children }: { title: string; children?: React.Re
 );
 
 const ReportsPage: React.FC = () => {
-  const [schools, setSchools] = useState<School[]>([]);
+  // const [schools, setSchools] = useState<School[]>([]);
   const [selectedSchool, setSelectedSchool] = useState<string>('');
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [selectedWeek, setSelectedWeek] = useState<Date>(new Date());
   const [dailyData, setDailyData] = useState<ChartData[]>([]);
   const [weeklyData, setWeeklyData] = useState<ChartData[]>([]);
   const [monthlyData, setMonthlyData] = useState<ChartData[]>([]);
-  const [comparisonData, setComparisonData] = useState<ChartData[]>([]);
+  // const [comparisonData, setComparisonData] = useState<ChartData[]>([]);
   const [dailyTimeData, setDailyTimeData] = useState([]);
   const [monthlyRange, setMonthlyRange] = useState<DateRange>({
     from: startOfMonth(new Date(new Date().getFullYear(), 0, 1)), // Start of current year
     to: endOfMonth(new Date()) // End of current month
   });
-
+  const [userSchools, setUserSchools] = React.useState<UserSchool[]>([]);
   const { setLoading } = useAppStore();
 
   // Fetch schools
+  // useEffect(() => {
+  //   const fetchSchools = async () => {
+  //     setLoading({
+  //       isLoading: true,
+  //       message: 'Loading schools...',
+  //       type: 'content'
+  //     });
+
+  //     try {
+  //       const response = await fetch('/api/schools');
+  //       const data = await response.json();
+  //       setSchools(data);
+  //       console.log("Fetched schools data-------", data[0].id);
+  //       if (data.length > 0) {
+  //         setSelectedSchool(data[0].id);
+  //       }
+  //     } catch (error) {
+  //       console.error('Error fetching schools:', error);
+  //     } finally {
+  //       setLoading({
+  //         isLoading: false
+  //       });
+  //     }
+  //   };
+
+  //   fetchSchools();
+  // }, []);
+
+
   useEffect(() => {
-    const fetchSchools = async () => {
+    const fetchUserSchools = async () => {
+
       setLoading({
         isLoading: true,
-        message: 'Loading schools...',
+        message: 'Fetching Schools...',
         type: 'content'
       });
-
       try {
-        const response = await fetch('/api/schools');
-        const data = await response.json();
-        setSchools(data);
-        if (data.length > 0) {
-          setSelectedSchool(data[0].id);
+        // Add authentication header
+        const response = await fetch('/api/users/schools', {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to fetch your schools!');
         }
-      } catch (error) {
-        console.error('Error fetching schools:', error);
+
+        const data = await response.json();
+        setUserSchools(data);
+
+        const preferredSchool = data.find(school => school.isPreferred === true);
+        if (preferredSchool) {
+          const schoolId = preferredSchool.school.id;
+          setSelectedSchool(schoolId);
+        }
+      } catch (err) {
+        console.error('Error fetching user schools:', err);
+        // setError(err instanceof Error ? err.message : 'Failed to load your schools');
       } finally {
         setLoading({
           isLoading: false
         });
       }
     };
-
-    fetchSchools();
+    fetchUserSchools()
   }, []);
 
   // Fetch school comparison data
-  useEffect(() => {
-    const fetchComparisonData = async () => {
-      setLoading({
-        isLoading: true,
-        message: 'Loading comparison data...',
-        type: 'content'
-      });
+  // useEffect(() => {
+  //   const fetchComparisonData = async () => {
+  //     setLoading({
+  //       isLoading: true,
+  //       message: 'Loading comparison data...',
+  //       type: 'content'
+  //     });
 
-      try {
-        const response = await fetch('/api/reports/comparison');
-        const data = await response.json();
-        setComparisonData(data);
-      } catch (error) {
-        console.error('Error fetching comparison data:', error);
-      } finally {
-        setLoading({
-          isLoading: false
-        });
-      }
-    };
+  //     try {
+  //       const response = await fetch('/api/reports/comparison');
+  //       const data = await response.json();
+  //       setComparisonData(data);
+  //     } catch (error) {
+  //       console.error('Error fetching comparison data:', error);
+  //     } finally {
+  //       setLoading({
+  //         isLoading: false
+  //       });
+  //     }
+  //   };
 
-    fetchComparisonData();
-  }, []);
+  //   fetchComparisonData();
+  // }, []);
 
   // Fetch report data
   useEffect(() => {
@@ -169,9 +218,9 @@ const ReportsPage: React.FC = () => {
               <SelectValue placeholder="Select School" />
             </SelectTrigger>
             <SelectContent className="bg-white shadow-lg border-gray-200 min-w-[280px]">
-              {schools.map(school => (
-                <SelectItem key={school.id} value={school.id}>
-                  {school.name}
+              {userSchools.map(school => (
+                <SelectItem key={school.school.id} value={school.school.id}>
+                  {school.school.name}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -217,14 +266,14 @@ const ReportsPage: React.FC = () => {
         </section>
 
         {/* COMPARISONS */}
-        <section>
+        {/* <section>
           <Card className='bg-white'>
             <SectionHeader title="School Comparisons" />
             <div className='m-4'>
-              <SchoolComparisonChart comparisonData={comparisonData} schools={schools} />
+              <SchoolComparisonChart comparisonData={comparisonData} schools={userSchools} />
             </div>
           </Card>
-        </section>
+        </section> */}
 
       </SignedIn>
 
