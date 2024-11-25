@@ -10,7 +10,7 @@ import { endOfMonth, format, startOfMonth } from 'date-fns';
 
 import { TermPickerWithPresets } from '@/components/TermPickerWithPresets';
 import { SignedIn, SignedOut } from '@clerk/nextjs';
-import { LogIn } from 'lucide-react';
+import { LogIn, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import DailyFeedbackChart from './_components/DailyFeedbackChart';
@@ -68,7 +68,7 @@ const ReportsPage: React.FC = () => {
     to: endOfMonth(new Date()) // End of current month
   });
   const [userSchools, setUserSchools] = React.useState<UserSchool[]>([]);
-  const { setLoading } = useAppStore();
+  const { loading, setLoading } = useAppStore();
 
   // Fetch schools
   // useEffect(() => {
@@ -167,44 +167,84 @@ const ReportsPage: React.FC = () => {
   // }, []);
 
   // Fetch report data
-  useEffect(() => {
+
+  // useEffect(() => {
+  //   if (!selectedSchool) return;
+
+  //   const fetchReportData = async () => {
+  //     setLoading({
+  //       isLoading: true,
+  //       message: 'Loading report data...',
+  //       type: 'content'
+  //     });
+
+  //     try {
+  //       const [dailyRes, weeklyRes, monthlyRes] = await Promise.all([
+  //         fetch(`/api/reports/daily?schoolId=${selectedSchool}&date=${format(selectedDate, 'yyyy-MM-dd')}`),
+  //         fetch(`/api/reports/weekly?schoolId=${selectedSchool}&week=${format(selectedWeek, 'yyyy-MM-dd')}`),
+  //         fetch(`/api/reports/monthly?schoolId=${selectedSchool}&from=${format(monthlyRange.from, 'yyyy-MM-dd')}&to=${format(monthlyRange.to, 'yyyy-MM-dd')}`)
+  //       ]);
+
+  //       const [daily, weekly, monthly] = await Promise.all([
+  //         dailyRes.json(),
+  //         weeklyRes.json(),
+  //         monthlyRes.json()
+  //       ]);
+
+  //       setDailyData(daily.moods);
+  //       setDailyTimeData(daily.timeAnalysis);
+  //       setWeeklyData(weekly);
+  //       setMonthlyData(monthly);
+  //     } catch (error) {
+  //       console.error('Error fetching report data:', error);
+  //     } finally {
+  //       setLoading({
+  //         isLoading: false
+  //       });
+  //     }
+  //   };
+
+  //   fetchReportData();
+  // }, [selectedSchool, selectedDate, selectedWeek, monthlyRange]);
+
+  const fetchReportData = async () => {
     if (!selectedSchool) return;
+    setLoading({
+      isLoading: true,
+      message: 'Loading report data...',
+      type: 'content'
+    });
 
-    const fetchReportData = async () => {
+    try {
+      const [dailyRes, weeklyRes, monthlyRes] = await Promise.all([
+        fetch(`/api/reports/daily?schoolId=${selectedSchool}&date=${format(selectedDate, 'yyyy-MM-dd')}`),
+        fetch(`/api/reports/weekly?schoolId=${selectedSchool}&week=${format(selectedWeek, 'yyyy-MM-dd')}`),
+        fetch(`/api/reports/monthly?schoolId=${selectedSchool}&from=${format(monthlyRange.from, 'yyyy-MM-dd')}&to=${format(monthlyRange.to, 'yyyy-MM-dd')}`)
+      ]);
+
+      const [daily, weekly, monthly] = await Promise.all([
+        dailyRes.json(),
+        weeklyRes.json(),
+        monthlyRes.json()
+      ]);
+
+      setDailyData(daily.moods);
+      setDailyTimeData(daily.timeAnalysis);
+      setWeeklyData(weekly);
+      setMonthlyData(monthly);
+    } catch (error) {
+      console.error('Error fetching report data:', error);
+    } finally {
       setLoading({
-        isLoading: true,
-        message: 'Loading report data...',
-        type: 'content'
+        isLoading: false
       });
+    }
+  };
 
-      try {
-        const [dailyRes, weeklyRes, monthlyRes] = await Promise.all([
-          fetch(`/api/reports/daily?schoolId=${selectedSchool}&date=${format(selectedDate, 'yyyy-MM-dd')}`),
-          fetch(`/api/reports/weekly?schoolId=${selectedSchool}&week=${format(selectedWeek, 'yyyy-MM-dd')}`),
-          fetch(`/api/reports/monthly?schoolId=${selectedSchool}&from=${format(monthlyRange.from, 'yyyy-MM-dd')}&to=${format(monthlyRange.to, 'yyyy-MM-dd')}`)
-        ]);
-
-        const [daily, weekly, monthly] = await Promise.all([
-          dailyRes.json(),
-          weeklyRes.json(),
-          monthlyRes.json()
-        ]);
-
-        setDailyData(daily.moods);
-        setDailyTimeData(daily.timeAnalysis);
-        setWeeklyData(weekly);
-        setMonthlyData(monthly);
-      } catch (error) {
-        console.error('Error fetching report data:', error);
-      } finally {
-        setLoading({
-          isLoading: false
-        });
-      }
-    };
-
+  useEffect(() => {
     fetchReportData();
   }, [selectedSchool, selectedDate, selectedWeek, monthlyRange]);
+
 
   return (
     <div className="p-4 max-w-7xl mx-auto space-y-8">
@@ -213,18 +253,28 @@ const ReportsPage: React.FC = () => {
         {/* HEADER */}
         <section>
           <h1 className="text-2xl font-bold mb-6">Reports</h1>
-          <Select value={selectedSchool} onValueChange={setSelectedSchool}>
-            <SelectTrigger className="w-[280px] bg-white border-gray-200 shadow-sm">
-              <SelectValue placeholder="Select School" />
-            </SelectTrigger>
-            <SelectContent className="bg-white shadow-lg border-gray-200 min-w-[280px]">
-              {userSchools.map(school => (
-                <SelectItem key={school.school.id} value={school.school.id}>
-                  {school.school.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className='flex flex-row gap-4 items-center sm:justify-start justify-between'>
+            <Select value={selectedSchool} onValueChange={setSelectedSchool}>
+              <SelectTrigger className="w-[280px] bg-white border-gray-200 shadow-sm">
+                <SelectValue placeholder="Select School" />
+              </SelectTrigger>
+              <SelectContent className="bg-white shadow-lg border-gray-200 min-w-[280px]">
+                {userSchools.map(school => (
+                  <SelectItem key={school.school.id} value={school.school.id}>
+                    {school.school.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button
+              variant="outline"
+              className='bg-white border-gray-200 shadow-sm'
+              onClick={fetchReportData}
+              disabled={loading.isLoading}
+            >
+              <RefreshCw className={loading.isLoading ? "animate-spin" : ""} />
+            </Button>
+          </div>
         </section>
 
         {/* DAILY ANALYSIS */}
