@@ -5,7 +5,7 @@ const DailyTimeAnalysis = ({ timeData }) => {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle>Submissions by Time</CardTitle>
+        <CardTitle>Total Submissions by Time</CardTitle>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>

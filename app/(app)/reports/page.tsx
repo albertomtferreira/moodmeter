@@ -18,6 +18,7 @@ import WeeklySubmissionsChart from './_components/WeeklySubmissionsChart';
 import DailyTimeAnalysis from './_components/DailyTimeAnalysis';
 import WeeklyTrendChart from './_components/WeeklyTrendChart';
 import MonthlySatisfactionChart from './_components/MonthlySatisfactionChart';
+import DailyTrendByTime from './_components/DailyTrendByTime';
 // import SchoolComparisonChart from './_components/SchoolComparisonChart';
 
 
@@ -286,6 +287,10 @@ const ReportsPage: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 m-4">
               <DailyFeedbackChart dailyData={dailyData} />
               <DailyTimeAnalysis timeData={dailyTimeData} />
+
+
+              {/* Daily Trend by time */}
+              <DailyTrendByTime timeData={dailyTimeData} />
             </div>
           </Card>
         </section>

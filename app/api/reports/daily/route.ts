@@ -2,6 +2,7 @@
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 import { parseISO, startOfDay, endOfDay, format } from 'date-fns';
+import { MoodType } from '@prisma/client';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -43,18 +44,34 @@ export async function GET(request: Request) {
 
     const timeData = await Promise.all(
       timeSlots.map(async ({ start, end }) => {
-        const count = await prisma.mood.count({
+        const moodsByType = await prisma.mood.groupBy({
+          by: ['type'],
           where: {
             schoolId,
             timestamp: {
               gte: new Date(`${format(dayStart, 'yyyy-MM-dd')}T${start}:00`),
               lt: new Date(`${format(dayStart, 'yyyy-MM-dd')}T${end}:00`)
             }
-          }
+          },
+          _count: true
         });
+
+        // Create an object with all mood types initialized to 0
+        const moodCounts = {
+          HAPPY: 0,
+          OKAY: 0,
+          UNHAPPY: 0
+        };
+
+        // Update counts from the query results
+        moodsByType.forEach(mood => {
+          moodCounts[mood.type] = mood._count;
+        });
+
         return {
           name: `${start}-${end}`,
-          submissions: count
+          submissions: Object.values(moodCounts).reduce((a, b) => a + b, 0),
+          ...moodCounts
         };
       })
     );
