@@ -12,6 +12,7 @@ import UserSchools from '@/components/UserSchools';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import UpdatePinModal from '@/components/UpdatePinModal';
+import LunchMenuManagement from './_components/LunchMenuManagement';
 
 
 interface SettingsSectionProps {
@@ -134,10 +135,7 @@ export default function SettingsPage() {
                   <CardTitle>Admin Settings</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-sm text-muted-foreground">
-                    Manage mood entries and system settings
-                  </div>
-                  {/* Add your admin controls here */}
+                  <LunchMenuManagement />
                 </CardContent>
               </Card>
             </ProtectedRoute>
