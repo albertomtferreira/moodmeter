@@ -279,7 +279,6 @@ const HomePage = () => {
           </h1>
         </div>
 
-
         {/* Main Content */}
         <div className="flex-1 flex flex-col items-center justify-center w-full max-w-6xl" style={{ marginTop: '-20vh' }}>
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 sm:mb-4 text-text text-center px-2">
