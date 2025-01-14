@@ -233,29 +233,8 @@ const HomePage = () => {
       <SignedIn>
         <NavbarToggle />
       </SignedIn>
-      <div
-        className="bg-background flex flex-col items-center px-4 py-2 sm:px-8 sm:py-4"
-        style={{ height: viewportHeight, maxHeight: viewportHeight }}
+      <div className="bg-background flex flex-col items-center px-4 py-2 sm:px-8 sm:py-4" style={{ height: viewportHeight, maxHeight: viewportHeight }}
       >
-
-
-        {/* Header Section */}
-        <div className="w-full max-w-6xl flex justify-center pt-2">
-          <h1
-            className={`text-center text-lg sm:text-xl font-medium transition-all duration-300 ease-in-out max-w-[90vw] 
-              ${selectedSchool
-                ? 'opacity-100 transform translate-y-0'
-                : 'transform -translate-y-4'
-              }
-              `}
-          >
-            {selectedSchool
-              ? <>Providing feedback for <span className='font-bold shadow-md rounded-md' style={{ color: selectedSchool.color }}>{selectedSchool.name}</span></>
-              : 'Please select a school from the menu on the top right'
-            }
-          </h1>
-        </div>
-
 
         {/* School Selection Modal */}
         <Dialog open={showModal} onOpenChange={setShowModal}>
@@ -283,28 +262,27 @@ const HomePage = () => {
           </DialogContent>
         </Dialog>
 
-        {/* Notifications */}
-        <Notification
-          show={showSuccessModal}
-          onClose={setShowSuccessModal}
-          type="success"
-          title="Thank You!"
-          message={`Your feedback has been successfully recorded for ${selectedSchool?.name}.`}
-          icon={CheckCircle2}
-        />
+        {/* Header Section */}
+        <div className="w-full max-w-6xl flex justify-center pb-8">
+          <h1
+            className={`text-center text-lg sm:text-xl font-medium transition-all duration-300 ease-in-out max-w-[90vw] 
+              ${selectedSchool
+                ? 'opacity-100 transform translate-y-0'
+                : 'transform -translate-y-4'
+              }
+              `}
+          >
+            {selectedSchool
+              ? <>Providing feedback for <span className='font-bold shadow-md rounded-md' style={{ color: selectedSchool.color }}>{selectedSchool.name}</span></>
+              : 'Please select a school from the menu on the top right'
+            }
+          </h1>
+        </div>
 
-        <Notification
-          show={showErrorModal}
-          onClose={setShowErrorModal}
-          type="error"
-          title="Oops!"
-          message="Something went wrong while recording your feedback. Please try again. User Session might have expired."
-          icon={AlertCircle}
-        />
 
         {/* Main Content */}
         <div className="flex-1 flex flex-col items-center justify-center w-full max-w-6xl" style={{ marginTop: '-20vh' }}>
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-8 text-text text-center px-2">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 sm:mb-4 text-text text-center px-2">
             How was your lunch today?
           </h1>
           <div className="grid grid-cols-3 gap-2 sm:gap-4 md:gap-8 w-full max-w-5xl px-2">
@@ -323,6 +301,26 @@ const HomePage = () => {
               onClick={() => handleFeedback('unhappy')}
               disabled={isButtonDisabled()}
             />
+
+            {/* Notifications */}
+            <Notification
+              show={showSuccessModal}
+              onClose={setShowSuccessModal}
+              type="success"
+              title="Thank You!"
+              message={`Your feedback has been successfully recorded for ${selectedSchool?.name}.`}
+              icon={CheckCircle2}
+            />
+
+            <Notification
+              show={showErrorModal}
+              onClose={setShowErrorModal}
+              type="error"
+              title="Oops!"
+              message="Something went wrong while recording your feedback. Please try again. User Session might have expired."
+              icon={AlertCircle}
+            />
+
           </div>
         </div>
       </div>
