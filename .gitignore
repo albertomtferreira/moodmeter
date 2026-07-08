@@ -32,6 +32,10 @@ yarn-error.log*
 .env.development.local
 .env.test.local
 .env.production.local
+.env.local.before-vercel-sync
+
+# database backups
+prisma/backups/*.json
 
 # vercel
 .vercel
