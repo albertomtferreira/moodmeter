@@ -11,6 +11,7 @@ The migration should be staged so the app remains verifiable after each major ch
 ### Library Upgrades
 
 - Upgrade Next.js, React, React DOM, TypeScript, Sentry, TanStack Query, Recharts, Radix packages, Tailwind, Zod, Zustand, date-fns, react-hook-form, lucide-react, and related type packages to the latest compatible stable versions at implementation time.
+- Resolve current Dependabot alerts from the baseline lockfile, including the vulnerable legacy Clerk package and transitive `path-to-regexp`.
 - Add `firebase` and `firebase-admin`.
 - Remove `@clerk/*`, `@prisma/client`, `prisma`, `@vercel/postgres`, and Prisma-specific scripts after Firestore is live and verified.
 - Update scripts to remove `prisma generate`, `db:push`, and `prisma:studio`, then add Firestore migration, seed, and verification scripts.

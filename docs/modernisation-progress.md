@@ -44,6 +44,7 @@ Use this tracker alongside [modernisation-plan.md](modernisation-plan.md). Mark 
 **Core changes**
 
 - Upgrade Next.js, React, React DOM, TypeScript, Sentry, TanStack Query, Recharts, Radix packages, Tailwind, Zod, Zustand, date-fns, react-hook-form, lucide-react, and related type packages.
+- Resolve current Dependabot alerts introduced by the baseline lockfile, including `@clerk/nextjs` and its transitive `path-to-regexp` dependency.
 - Add `firebase` and `firebase-admin`.
 - Keep Prisma and Clerk temporarily until replacement work is complete.
 - Resolve framework, React, TypeScript, and lint/build compatibility issues.
