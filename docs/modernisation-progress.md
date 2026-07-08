@@ -51,12 +51,12 @@ Use this tracker alongside [modernisation-plan.md](modernisation-plan.md). Mark 
 
 **Checklist**
 
-- [ ] Recheck latest stable package versions.
-- [ ] Update `package.json`.
-- [ ] Regenerate `package-lock.json`.
-- [ ] Resolve Next.js and React breaking changes.
-- [ ] Resolve TypeScript errors.
-- [ ] Run production build.
+- [x] Recheck latest stable package versions.
+- [x] Update `package.json`.
+- [x] Regenerate `package-lock.json`.
+- [x] Resolve Next.js and React breaking changes.
+- [x] Resolve TypeScript errors.
+- [x] Run production build.
 
 **Exit criteria**
 
@@ -293,6 +293,7 @@ Use this tracker alongside [modernisation-plan.md](modernisation-plan.md). Mark 
 
 | Date | Phase | Status | Notes |
 | --- | --- | --- | --- |
+| 2026-07-08 | Phase 2 | Complete | Upgraded to Next 16.2.10, React 19.2.7, TypeScript 6.0.3, Clerk 7.5.14, Sentry 10.64.0, Tailwind 4.3.2, Firebase 12.15.0, and Firebase Admin 14.1.0. Runtime moved to Node 24.x for Vercel compatibility. TypeScript, lint, and production build pass. Remaining audit advisories require upstream fixes or force downgrades; see `docs/phase_2/implementation.md`. |
 | 2026-07-08 | Phase 1 | Complete | Local Vercel environment sync and switching off work Wi-Fi resolved DB access. TypeScript and production build pass. Fresh Neon backup created at `prisma/backups/backup-2026-07-08T14-06-28-015Z.json` with users 9, schools 5, schoolUsers 25, moods 68275, userSettings 0, schoolSettings 4, pwaInstallationEvents 70. Runtime baseline locked with `package.json` `engines.node` set to `20.x`. |
 | 2026-07-08 | Phase 1 | Blocked | TypeScript passed. Production build blocker documented: Prisma generate `EPERM` renaming query engine DLL. Fresh Neon backup blocked by database connectivity; no new backup artifact created. Local Node/npm documented, deployment runtime config not present in repo. See `docs/phase_1/`. |
 | 2026-07-08 | Planning | Complete | Initial modernisation tracker created. |

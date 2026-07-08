@@ -1,12 +1,12 @@
 // app/api/analytics/pwa/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { auth } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
 import { AnalyticsMetrics } from '@/types/analytics';
 
 export async function POST(req: NextRequest) {
   try {
-    const { userId } = auth();
+    const { userId } = await auth();
     const body = await req.json();
 
     const event = await prisma.pWAInstallationEvent.create({
@@ -39,7 +39,7 @@ type ValidDistinctField = typeof distinctFields[number];
 
 export async function GET(req: NextRequest) {
   try {
-    const { userId } = auth();
+    const { userId } = await auth();
     const searchParams = new URL(req.url).searchParams;
     const days = parseInt(searchParams.get('days') || '30');
     const startDate = new Date();

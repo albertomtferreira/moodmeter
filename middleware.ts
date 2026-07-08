@@ -1,33 +1,15 @@
 // middleware.ts
-import { authMiddleware } from "@clerk/nextjs";
+import { clerkMiddleware } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { prisma } from '@/lib/prisma';
 
-export default authMiddleware({
-  publicRoutes: [
-    "/",
-    "/about",
-    "/pricing",
-    "/contact",
-    "/api/webhook/clerk",
-    "/sign-in(.*)",
-    "/sign-up(.*)",
-  ],
+export default clerkMiddleware(async (auth, req) => {
+  const { userId } = await auth();
 
-  async afterAuth(auth, req) {
-    // Convert header values to string or undefined instead of possibly null
-    const svix_id = req.headers.get("svix-id") || undefined;
-    const svix_timestamp = req.headers.get("svix-timestamp") || undefined;
-    const svix_signature = req.headers.get("svix-signature") || undefined;
-
-    // if (!auth.userId && !req.nextUrl.pathname.startsWith('/sign-in')) {
-    //   return NextResponse.redirect(new URL('/sign-in', req.url));
-    // }
-
-    try {
-      if (auth.userId) {
+  try {
+    if (userId) {
         const user = await prisma.user.findUnique({
-          where: { clerkId: auth.userId },
+          where: { clerkId: userId },
           select: { role: true }
         });
 
@@ -48,14 +30,13 @@ export default authMiddleware({
             headers: requestHeaders,
           },
         });
-      }
-    } catch (error) {
-      console.error('Error in middleware:', error);
-      return NextResponse.next();
     }
-
+  } catch (error) {
+    console.error('Error in middleware:', error);
     return NextResponse.next();
-  },
+  }
+
+  return NextResponse.next();
 });
 
 export const config = {

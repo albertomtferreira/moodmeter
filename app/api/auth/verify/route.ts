@@ -1,7 +1,7 @@
 // app/api/auth/verify/route.ts
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
 import { createRateLimiter } from '@/lib/rateLimit';
 
 const rateLimiter = createRateLimiter({
@@ -20,7 +20,7 @@ export async function POST(req: Request) {
       );
     }
     // Get the current user's Clerk ID
-    const { userId: clerkId } = auth();
+    const { userId: clerkId } = await auth();
 
     if (!clerkId) {
       return NextResponse.json(

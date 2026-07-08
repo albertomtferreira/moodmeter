@@ -1,7 +1,7 @@
 // app/api/admin/data/user/update-pin/route.ts
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { auth } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
 import { z } from 'zod';
 
 const updatePinSchema = z.object({
@@ -11,7 +11,7 @@ const updatePinSchema = z.object({
 
 export async function PUT(req: Request) {
   try {
-    const { userId } = auth();
+    const { userId } = await auth();
     if (!userId) {
       return NextResponse.json(
         { message: 'Unauthorized' },
@@ -65,7 +65,7 @@ export async function PUT(req: Request) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { message: 'Invalid input data', errors: error.errors },
+        { message: 'Invalid input data', errors: error.issues },
         { status: 400 }
       );
     }

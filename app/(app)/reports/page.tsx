@@ -9,7 +9,7 @@ import { useAppStore } from '@/store/useAppStore';
 import { endOfMonth, format, startOfMonth } from 'date-fns';
 
 import { TermPickerWithPresets } from '@/components/TermPickerWithPresets';
-import { SignedIn, SignedOut } from '@clerk/nextjs';
+import { SignedIn, SignedOut } from '@/components/ClerkAuthState';
 import { LogIn, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';

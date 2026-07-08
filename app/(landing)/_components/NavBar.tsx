@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
-import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import { UserButton } from "@clerk/nextjs";
+import { SignedIn, SignedOut } from "@/components/ClerkAuthState";
 import Link from "next/link";
 
 export default function NavBar() {
@@ -42,7 +43,7 @@ export default function NavBar() {
               <Button asChild variant="ghost">
                 <Link href="/dashboard">Dashboard</Link>
               </Button>
-              <UserButton afterSignOutUrl="/" />
+              <UserButton />
             </SignedIn>
           </div>
         </div>

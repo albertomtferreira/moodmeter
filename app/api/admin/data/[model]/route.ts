@@ -1,7 +1,7 @@
 // app/api/admin/data/[model]/route.ts
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
 import { z } from 'zod';
 
 // Validation schemas for each model
@@ -33,10 +33,10 @@ const modelSchemas = {
 
 export async function GET(
   req: Request,
-  { params }: { params: { model: string } }
+  { params }: { params: Promise<{ model: string }> }
 ) {
   try {
-    const { userId } = auth();
+    const { userId } = await auth();
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -49,7 +49,8 @@ export async function GET(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const model = params.model.toLowerCase();
+    const { model: modelParam } = await params;
+    const model = modelParam.toLowerCase();
 
     // Model specific queries
     switch (model) {
@@ -98,10 +99,10 @@ export async function GET(
 
 export async function POST(
   req: Request,
-  { params }: { params: { model: string } }
+  { params }: { params: Promise<{ model: string }> }
 ) {
   try {
-    const { userId } = auth();
+    const { userId } = await auth();
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -114,7 +115,8 @@ export async function POST(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const model = params.model.toLowerCase();
+    const { model: modelParam } = await params;
+    const model = modelParam.toLowerCase();
     const schema = modelSchemas[model as keyof typeof modelSchemas];
 
     if (!schema) {
@@ -133,7 +135,7 @@ export async function POST(
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Validation error', details: error.errors },
+        { error: 'Validation error', details: error.issues },
         { status: 400 }
       );
     }
@@ -148,10 +150,10 @@ export async function POST(
 
 export async function PUT(
   req: Request,
-  { params }: { params: { model: string } }
+  { params }: { params: Promise<{ model: string }> }
 ) {
   try {
-    const { userId } = auth();
+    const { userId } = await auth();
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -164,7 +166,8 @@ export async function PUT(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const model = params.model.toLowerCase();
+    const { model: modelParam } = await params;
+    const model = modelParam.toLowerCase();
     const schema = modelSchemas[model as keyof typeof modelSchemas];
 
     if (!schema) {
@@ -184,7 +187,7 @@ export async function PUT(
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Validation error', details: error.errors },
+        { error: 'Validation error', details: error.issues },
         { status: 400 }
       );
     }
@@ -199,10 +202,10 @@ export async function PUT(
 
 export async function DELETE(
   req: Request,
-  { params }: { params: { model: string } }
+  { params }: { params: Promise<{ model: string }> }
 ) {
   try {
-    const { userId } = auth();
+    const { userId } = await auth();
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -216,7 +219,8 @@ export async function DELETE(
     }
 
     const { id } = await req.json();
-    const model = params.model.toLowerCase();
+    const { model: modelParam } = await params;
+    const model = modelParam.toLowerCase();
     const prismaModel = prisma[model as keyof typeof prisma];
 
     if (!prismaModel) {

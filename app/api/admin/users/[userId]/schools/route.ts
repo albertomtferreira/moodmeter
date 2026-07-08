@@ -1,14 +1,14 @@
 // app/api/admin/users/[userId]/schools/route.ts
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
 
 export async function POST(
   req: Request,
-  { params }: { params: { userId: string } }
+  { params }: { params: Promise<{ userId: string }> }
 ) {
   try {
-    const { userId: clerkId } = auth();
+    const { userId: clerkId } = await auth();
     if (!clerkId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -22,7 +22,7 @@ export async function POST(
     }
 
     const { schoolIds, preferredSchoolId } = await req.json();
-    const { userId } = params;
+    const { userId } = await params;
 
     // Start a transaction to handle all updates
     await prisma.$transaction(async (tx) => {

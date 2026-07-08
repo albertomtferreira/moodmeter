@@ -4,7 +4,7 @@ import { headers } from 'next/headers';
 export async function POST(req: Request) {
   try {
     // Log headers
-    const headersList = headers();
+    const headersList = await headers();
     const headerData = {
       'content-type': headersList.get('content-type'),
       'user-agent': headersList.get('user-agent'),

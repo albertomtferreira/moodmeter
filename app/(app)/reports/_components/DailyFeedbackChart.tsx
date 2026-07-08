@@ -40,8 +40,8 @@ const DailyFeedbackChart = ({ dailyData }) => {
             />
             <Legend
               formatter={(value, entry) => {
-                const { payload } = entry;
-                return `${value}: ${payload!.value} `;
+                const payload = entry.payload as { value?: number } | undefined;
+                return `${value}: ${payload?.value ?? 0} `;
               }}
             />
           </PieChart>

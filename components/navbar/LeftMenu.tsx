@@ -5,7 +5,8 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import Link from 'next/link';
 import { Menu, Home, FileText, Settings, LogIn } from 'lucide-react';
-import { SignedIn, SignedOut, useClerk } from '@clerk/nextjs';
+import { useClerk } from '@clerk/nextjs';
+import { SignedIn, SignedOut } from '@/components/ClerkAuthState';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useSchoolStore } from '@/store/useSchoolStore';

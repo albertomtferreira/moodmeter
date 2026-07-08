@@ -1,6 +1,6 @@
 // app/api/users/me/route.ts
 import { prisma } from '@/lib/prisma';
-import { auth } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { Prisma } from '@prisma/client';
 
@@ -13,7 +13,7 @@ interface ErrorResponse {
 
 export async function GET() {
   try {
-    const { userId } = auth();
+    const { userId } = await auth();
 
     if (!userId) {
       return NextResponse.json<ErrorResponse>(

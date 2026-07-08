@@ -1,11 +1,11 @@
 // app/api/reports/comparison/route.ts
 import { prisma } from '@/lib/prisma';
-import { auth } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
-    const { userId: clerkId } = auth();
+    const { userId: clerkId } = await auth();
 
     if (!clerkId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

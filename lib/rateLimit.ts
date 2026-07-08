@@ -1,6 +1,6 @@
 // lib/rateLimit.ts
 import { NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
 
 // Simple in-memory store for rate limiting
 // Note: In production, use Redis or similar for distributed systems
@@ -13,7 +13,7 @@ interface RateLimitConfig {
 
 export function createRateLimiter(config: RateLimitConfig) {
   return async function rateLimiter(req: Request) {
-    const { userId } = auth();
+    const { userId } = await auth();
     if (!userId) return false;
 
     const key = `${userId}:auth`;

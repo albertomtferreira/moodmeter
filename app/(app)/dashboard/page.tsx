@@ -12,8 +12,7 @@ import { useSchoolStore } from '@/store/useSchoolStore';
 import { useAppStore } from '@/store/useAppStore';
 import { usePreferredSchool } from '@/hooks/usePreferredSchool';
 import NavbarToggle from '@/components/navbar/NavbarToggle';
-import { SignedOut } from '@clerk/nextjs';
-import { SignedIn } from '@clerk/clerk-react';
+import { SignedIn } from '@/components/ClerkAuthState';
 
 const HomePage = () => {
   const { isAuthenticated } = useAuthStore();
