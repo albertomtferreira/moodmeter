@@ -1,5 +1,6 @@
 // app/api/webhook/clerk/route.ts
 import { prisma } from '@/lib/prisma';
+import { deleteLocalUser } from '@/lib/delete-user';
 import { Webhook } from 'svix';
 import { headers } from 'next/headers';
 import { WebhookEvent } from '@clerk/nextjs/server';
@@ -160,15 +161,14 @@ export async function POST(req: Request) {
         case 'user.deleted': {
           console.log('Processing user deletion event');
           const data = evt.data;
-          const clerkId = data.id as string;
+          const clerkId = data.id;
+          if (typeof clerkId !== 'string' || !clerkId.trim()) {
+            return new Response('User ID is required', { status: 400 });
+          }
 
-          const deletedUser = await prisma.user.delete({
-            where: { clerkId },
-          });
+          await deleteLocalUser(prisma, clerkId);
 
-          console.log('User deleted successfully:', deletedUser);
-
-          return new Response(JSON.stringify({ success: true, user: deletedUser }), {
+          return new Response(JSON.stringify({ success: true }), {
             status: 200,
             headers: { 'Content-Type': 'application/json' },
           });

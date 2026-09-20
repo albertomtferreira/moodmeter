@@ -1,7 +1,8 @@
 // app/api/admin/data/[model]/route.ts
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { auth, clerkClient } from '@clerk/nextjs/server';
+import { deleteUserAccount } from '@/lib/delete-user';
 import { z } from 'zod';
 
 // Validation schemas for each model
@@ -218,13 +219,29 @@ export async function DELETE(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const { id } = await req.json();
+    const body = await req.json().catch(() => null);
+    const parsed = z.object({ id: z.string().trim().min(1) }).safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({ error: 'A valid record ID is required' }, { status: 400 });
+    }
+    const { id } = parsed.data;
     const { model: modelParam } = await params;
     const model = modelParam.toLowerCase();
     const prismaModel = prisma[model as keyof typeof prisma];
 
-    if (!prismaModel) {
+    if (!['user', 'school', 'mood'].includes(model)) {
       return NextResponse.json({ error: 'Invalid model' }, { status: 400 });
+    }
+
+    if (model === 'user') {
+      const result = await deleteUserAccount(prisma, id, user.id, async (clerkId) => {
+        const client = await clerkClient();
+        return client.users.deleteUser(clerkId);
+      });
+      return NextResponse.json(
+        result.error ? { error: result.error } : { success: true },
+        { status: result.status },
+      );
     }
 
     await (prismaModel as any).delete({

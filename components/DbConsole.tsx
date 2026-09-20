@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Table,
   TableBody,
@@ -42,6 +42,8 @@ const DbConsole = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [editItem, setEditItem] = useState<DataItem | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const deletingRef = useRef(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const { setLoading, loading } = useAppStore();
   const { toast } = useToast();
 
@@ -145,7 +147,14 @@ const DbConsole = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this record?')) return;
+    if (deletingRef.current) return;
+    const item = data.find((entry: DataItem) => entry.id === id);
+    const message = selectedModel === 'User'
+      ? `Permanently delete ${item?.email || item?.username || id}? This removes their login account, school memberships, and preferences.`
+      : 'Are you sure you want to delete this record?';
+    if (!confirm(message)) return;
+    deletingRef.current = true;
+    setIsDeleting(true);
 
     setLoading({
       isLoading: true,
@@ -160,7 +169,10 @@ const DbConsole = () => {
         body: JSON.stringify({ id }),
       });
 
-      if (!response.ok) throw new Error('Failed to delete record');
+      if (!response.ok) {
+        const result = await response.json().catch(() => null);
+        throw new Error(result?.error || 'Failed to delete record');
+      }
       await fetchData();
       toast({
         title: 'Success',
@@ -170,10 +182,12 @@ const DbConsole = () => {
     } catch (error) {
       toast({
         title: 'Error',
-        description: 'Failed to delete record',
+        description: error instanceof Error ? error.message : 'Failed to delete record',
         variant: 'destructive',
       });
     } finally {
+      deletingRef.current = false;
+      setIsDeleting(false);
       setLoading({
         isLoading: false
       });
@@ -301,6 +315,7 @@ const DbConsole = () => {
                         variant="ghost"
                         size="icon"
                         className="text-destructive"
+                        disabled={isDeleting}
                         onClick={() => handleDelete(item.id)}
                       >
                         <Trash2 className="h-4 w-4" />
