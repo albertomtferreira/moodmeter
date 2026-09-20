@@ -1,5 +1,6 @@
 import { withSentryConfig } from '@sentry/nextjs';
 import withPWA from 'next-pwa';
+import runtimeCaching from 'next-pwa/cache.js';
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -12,7 +13,18 @@ const withPWAConfig = withPWA({
   // disable: false,
   disable: process.env.NODE_ENV === 'development',
   register: true,
-  skipWaiting: true
+  skipWaiting: true,
+  // Authenticated report responses must never fall back to another session's
+  // service-worker cache, even when offline or when an API request is slow.
+  runtimeCaching: [
+    {
+      urlPattern: ({ url }) => url.origin === self.location.origin &&
+        (url.pathname.startsWith('/api/reports/') || url.pathname === '/api/users/schools'),
+      handler: 'NetworkOnly',
+      method: 'GET',
+    },
+    ...runtimeCaching,
+  ],
 })(nextConfig);
 
 // Sentry configuration

@@ -70,3 +70,20 @@
     }
   }
 }
+
+/* Reports has a responsive portrait layout; retain the kiosk rotation rule elsewhere. */
+[data-reports-page] :is(button, summary, input, select, a):focus-visible {
+  outline: 2px solid #4338ca;
+  outline-offset: 3px;
+}
+
+@media screen and (min-width: 768px) and (orientation: portrait) {
+  body:has([data-reports-page])::before,
+  body:has([data-reports-page])::after {
+    display: none;
+  }
+
+  body:has([data-reports-page]) > *:not(.rotation-message) {
+    display: revert;
+  }
+}
