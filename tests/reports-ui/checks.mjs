@@ -1,0 +1,101 @@
+// Run checkReports(page) with a Playwright Page while npm run preview:reports is running.
+export async function checkReports(page) {
+  const check = (value, message) => { if (!value) throw new Error(message); };
+  const url = 'http://127.0.0.1:3101/reports?date=2026-09-18&week=2026-09-14&from=2026-05-01&to=2026-09-20';
+  const errors = [];
+  const requests = [];
+  page.on('pageerror', error => errors.push(error.message));
+  page.on('request', request => { if (request.url().includes('/api/reports/')) requests.push(request.url()); });
+  const region = name => page.getByRole('region', { name, exact: true });
+  const ready = async () => { await page.getByRole('button', { name: 'Refresh all reports', exact: true }).waitFor(); await page.waitForFunction(() => !document.querySelector('[aria-label="Refresh all reports"]')?.disabled); };
+  await page.goto(url);
+  await ready();
+  check((await region('Selected week summary').innerText()).includes('175'), 'weekly summary uses weekly totals');
+  check(await page.locator('.recharts-pie-sector').count() === 3, 'pie renders three moods');
+  const beforeDate = requests.length;
+  await page.getByLabel('Daily report date', { exact: true }).fill('2026-09-17');
+  await ready();
+  check(requests.slice(beforeDate).length === 1 && requests.at(-1).includes('/daily?'), 'daily change only fetches daily report');
+  const beforeMode = requests.length;
+  await page.getByRole('button', { name: 'Percentages', exact: true }).click();
+  check(requests.length === beforeMode, 'display mode does not refetch');
+  check(page.url().includes('mode=percentages'), 'mode persists in URL');
+  await page.goBack();
+  await page.waitForFunction(() => new URL(location.href).searchParams.get('mode') === 'counts');
+  check(await page.getByRole('button', { name: 'Counts', exact: true }).getAttribute('aria-pressed') === 'true', 'back restores chart mode');
+  await page.goForward();
+  await page.reload(); await ready();
+  check(await page.getByLabel('Daily report date', { exact: true }).inputValue() === '2026-09-17', 'date survives reload');
+  check(await page.getByRole('button', { name: 'Percentages', exact: true }).getAttribute('aria-pressed') === 'true', 'mode survives reload');
+  let heldDaily;
+  await page.route('**/api/reports/daily?**date=2026-09-16', route => { heldDaily = route; });
+  const slowDaily = page.waitForRequest(request => request.url().includes('date=2026-09-16'));
+  await page.getByLabel('Daily report date', { exact: true }).fill('2026-09-16');
+  await slowDaily;
+  await page.getByLabel('Daily report date', { exact: true }).fill('2026-09-17'); await ready();
+  check((await region('Daily analysis').innerText()).includes('35 responses'), 'newer date stays visible while old request is pending');
+  await heldDaily?.abort().catch(() => {});
+  await page.unroute('**/api/reports/daily?**date=2026-09-16');
+  const happy = region('Daily analysis').getByRole('button', { name: 'Happy shown', exact: true });
+  await happy.focus(); await page.keyboard.press('Space');
+  check(await region('Daily analysis').getByRole('button', { name: 'Happy hidden' }).getAttribute('aria-pressed') === 'false', 'keyboard toggles mood');
+  check(await page.evaluate(() => getComputedStyle(document.activeElement).outlineStyle === 'solid'), 'keyboard focus has a visible outline');
+  await region('Daily analysis').locator('summary').click();
+  check((await region('Daily analysis').locator('tfoot').innerText()).includes('35'), 'table totals match chart');
+  const downloadPromise = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Download daily analysis CSV', exact: true }).click();
+  const download = await downloadPromise;
+  const stream = await download.createReadStream();
+  let csv = ''; for await (const chunk of stream) csv += chunk.toString();
+  check(csv.includes('"Happy","Okay","Unhappy","Total"'), 'CSV includes hidden mood');
+  check(csv.includes('Europe/London'), 'CSV includes timezone');
+
+  await page.route('**/api/reports/monthly?**', route => route.fulfill({ status: 503, contentType: 'application/json', body: '{"error":"Temporary monthly error"}' }));
+  await page.getByLabel('Monthly report range preset').selectOption('custom');
+  await page.getByLabel('Monthly start date').fill('2024-01-01');
+  await page.getByLabel('Monthly end date').fill('2026-09-20');
+  await page.getByRole('button', { name: 'Apply dates' }).click();
+  await region('Monthly analysis').getByRole('alert').waitFor();
+  await ready();
+  check(await page.getByRole('button', { name: 'Download monthly analysis CSV' }).isDisabled(), 'failed report cannot export');
+  check((await region('Daily analysis').innerText()).includes('35 responses'), 'monthly failure leaves daily report intact');
+  await page.unroute('**/api/reports/monthly?**');
+  await page.getByRole('button', { name: 'Retry monthly analysis' }).click(); await ready();
+  check(await region('Monthly analysis').getByRole('alert').count() === 0, 'retry clears error');
+  await page.getByLabel('Monthly report range preset').selectOption('all'); await ready();
+  await region('Monthly analysis').locator('summary').click();
+  check((await region('Monthly analysis').locator('caption').innerText()).includes('15 Jan 2024'), 'all data uses actual earliest response');
+
+  await page.getByLabel('Report school', { exact: true }).selectOption('empty'); await ready();
+  check(await page.getByText('No responses for this period', { exact: true }).count() === 3, 'all sections explain empty school');
+  await page.getByLabel('Report school', { exact: true }).selectOption('school-b'); await ready();
+  check((await region('Selected week summary').innerText()).includes('35'), 'school change loads new summary');
+  check(!(await region('Selected week summary').innerText()).includes('175'), 'previous school summary is not retained');
+  await page.goto(url + '&school=forbidden'); await ready();
+  check((await page.getByRole('status').allTextContents()).some(text => text.includes('not available to your account')), 'inaccessible URL school is explained');
+  check(await page.getByLabel('Report school', { exact: true }).inputValue() === 'school-a', 'inaccessible school falls back');
+
+  await page.route('**/api/users/schools', route => route.fulfill({ status: 503, contentType: 'application/json', body: '{"error":"Schools temporarily unavailable"}' }));
+  await page.reload();
+  await page.getByRole('button', { name: 'Retry schools', exact: true }).waitFor();
+  check(await region('Daily analysis').count() === 0, 'school failure does not fetch or display reports');
+  await page.unroute('**/api/users/schools');
+  await page.getByRole('button', { name: 'Retry schools', exact: true }).click(); await ready();
+  await page.route('**/api/users/schools', route => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+  await page.reload();
+  await page.getByRole('heading', { name: 'No schools assigned' }).waitFor();
+  check(await region('Daily analysis').count() === 0, 'no assignments shows an explicit empty state');
+  await page.unroute('**/api/users/schools');
+  await page.goto(url); await ready();
+
+  const sizes = [{ width: 1440, height: 1000, name: 'desktop' }, { width: 390, height: 844, name: 'mobile' }, { width: 820, height: 1180, name: 'tablet' }, { width: 320, height: 700, name: 'small-mobile' }];
+  for (const size of sizes) {
+    await page.setViewportSize({ width: size.width, height: size.height });
+    await page.getByRole('heading', { name: 'Reports', exact: true }).waitFor();
+    check(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${size.name} has no horizontal overflow`);
+    check(await page.getByRole('heading', { name: 'Reports', exact: true }).isVisible(), `${size.name} remains visible`);
+    await page.screenshot({ path: `.playwright-mcp/reports-${size.name}.png`, fullPage: true });
+  }
+  check(errors.length === 0, `No page errors: ${errors.join(', ')}`);
+  return { passed: 'Summary, independent queries, rapid date changes, history, reload, keyboard controls and focus, tables, CSV, failure/retry, all data, school switching, empty responses and assignments, inaccessible school and four responsive sizes.', requests: requests.length, pageErrors: errors };
+}
